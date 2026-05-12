@@ -7,11 +7,26 @@ function startP5() {
     localRenderer = window.Renderer;
 
     // --- Sketch manager ----------------------------------------------------
+    function getVisSize() {
+        var isMobile = window.innerWidth <= 700;
+        var w, margin;
+        if (isMobile) {
+            w = window.innerWidth - 24;
+            margin = { top: 0, left: Math.round(w * 0.07), bottom: 25, right: 8 };
+        } else {
+            var container = document.querySelector('.container');
+            var cw = container ? container.offsetWidth : Math.min(window.innerWidth, 890);
+            w = Math.max(200, cw - 270);
+            margin = { top: 0, left: 80, bottom: 40, right: 10 };
+        }
+        return { width: w, height: Math.round(w * (520 / 600)), margin: margin };
+    }
+
     function SketchManager() {
-        // core layout settings (canvas size only)
-        this.width = 600; // content width
-        this.height = 520; // content height
-        this.margin = { top: 0, left: 80, bottom: 40, right: 10 };
+        var size = getVisSize();
+        this.width = size.width;
+        this.height = size.height;
+        this.margin = size.margin;
         this.canvasWidth = this.width + this.margin.left + this.margin.right;
         this.canvasHeight = this.height + this.margin.top + this.margin.bottom;
 
@@ -27,16 +42,21 @@ function startP5() {
             p.setup = function () {
                 var parent = document.getElementById('vis');
                 parent.innerHTML = '';
-                if (window.innerWidth <= 700) {
-                    self.width = window.innerWidth - 24;
-                    self.height = Math.round(self.width * (520 / 600));
-                    self.margin = { top: 0, left: 40, bottom: 30, right: 10 };
-                    self.canvasWidth = self.width;
-                    self.canvasHeight = self.height;
-                }
                 p.createCanvas(self.canvasWidth, self.canvasHeight).parent('vis');
                 p.noStroke();
                 p.frameRate(30);
+            };
+
+            p.windowResized = function () {
+                var s = getVisSize();
+                self.width = s.width;
+                self.height = s.height;
+                self.margin = s.margin;
+                self.canvasWidth = s.width + s.margin.left + s.margin.right;
+                self.canvasHeight = s.height + s.margin.top + s.margin.bottom;
+                self._randomPoints = null;
+                self._barCounts = null;
+                p.resizeCanvas(self.canvasWidth, self.canvasHeight);
             };
 
             p.draw = function () {
