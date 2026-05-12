@@ -9,17 +9,19 @@ function startP5() {
     // --- Sketch manager ----------------------------------------------------
     function getVisSize() {
         var isMobile = window.innerWidth <= 700;
-        var w, margin;
+        var w, h, margin;
         if (isMobile) {
             w = window.innerWidth - 24;
             margin = { top: 0, left: Math.round(w * 0.07), bottom: 25, right: 8 };
+            h = Math.round(w * (520 / 600));
         } else {
-            var wFromWidth = Math.round(window.innerWidth * 0.70) - 20;
-            var wFromHeight = Math.round((window.innerHeight - 80) * (600 / 520));
-            w = Math.min(wFromWidth, wFromHeight);
             margin = { top: 0, left: 80, bottom: 40, right: 10 };
+            var availW = Math.round(window.innerWidth * 0.70) - 40 - margin.left - margin.right;
+            var wFromHeight = Math.round((window.innerHeight - 120) * (600 / 520)) - margin.left - margin.right;
+            w = Math.min(availW, wFromHeight);
+            h = Math.round(w * (520 / 600));
         }
-        return { width: w, height: Math.round(w * (520 / 600)), margin: margin };
+        return { width: w, height: h, margin: margin };
     }
 
     function SketchManager() {

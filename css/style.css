@@ -107,14 +107,13 @@
 }
 
 #vis {
-  display: inline-block;
+  display: flex;
+  justify-content: center;
   position: fixed;
+  left: calc(30vw + 20px);
+  right: 20px;
   top: 68px;
   z-index: 100;
-  margin-left: 0;
-  /* height: 600px; */
-  /* width: 600px; */
-  /* background-color: #ddd; */
 }
 
 /* visibility helpers for popup effect controlled by VisualController */
