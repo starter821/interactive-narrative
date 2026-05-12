@@ -109,10 +109,12 @@
 #vis {
   display: flex;
   justify-content: center;
+  align-items: center;
   position: fixed;
   left: calc(30vw + 20px);
   right: 20px;
   top: 68px;
+  bottom: 0;
   z-index: 100;
 }
 
