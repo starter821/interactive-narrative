@@ -25,12 +25,12 @@
                 return;
             }
 
-            if (ai === 6) {
+            if (ai === 6  || ai === 10) {
                 window.VizProgressColor.draw(p, manager, ai, progress);
                 return;
             }
 
-            if ((ai >= 4 && ai < 6) || ai === 9) {
+            if ((ai >= 4 && ai < 6)) {
                 window.VizScatter.draw(p, manager, ai, progress);
                 return;
             }

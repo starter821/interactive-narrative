@@ -90,7 +90,11 @@
   width: 30vw;
   top: 0px;
   z-index: 90;
-  padding-bottom: 200px;
+  padding-bottom: 0;
+}
+
+.step:last-child {
+  margin-bottom: 0;
 }
 
 .step {
