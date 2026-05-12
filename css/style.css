@@ -30,6 +30,14 @@
   white-space: nowrap;
 }
 
+#debug-state {
+  margin-left: auto;
+  font-family: monospace;
+  font-size: 12px;
+  color: #aaa;
+  white-space: nowrap;
+}
+
 .container {
   width: 100%;
   padding: 16px 20px 16px 40px;
@@ -87,6 +95,10 @@
 
 .step {
   margin-bottom: 200px;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.65;

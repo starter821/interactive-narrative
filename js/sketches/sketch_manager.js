@@ -64,6 +64,10 @@ function startP5() {
             p.draw = function () {
                 p.background(255);
                 self.draw(p);
+                var dbg = document.getElementById('debug-state');
+                if (dbg) {
+                    dbg.textContent = 'activeIndex: ' + (self.state.activeIndex || 0) + '   progress: ' + (self.state.progress || 0).toFixed(2);
+                }
             };
         };
 

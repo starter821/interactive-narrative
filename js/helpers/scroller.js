@@ -23,7 +23,7 @@
                 var top = rect.top + window.pageYOffset;
                 if (self.trigger === 'center') {
                     var centerY = top + (rect.height / 2);
-                    self.sectionPositions.push(centerY);
+                    self.sectionPositions.push(centerY - window.innerHeight * 0.4);
                 } else {
                     self.sectionPositions.push(top);
                 }
@@ -52,14 +52,23 @@
                 self.onActive(sectionIndex);
             }
 
-            // Compute progress as fraction through the current section's
-            // bounding box for finer-grained values (0..1).
+            // Compute progress (0..1) through the current section.
+            // For center trigger: progress travels 0→1 as the section's center
+            // moves through ±40% of the viewport height around the viewport center.
+            // For top trigger: progress is fraction through the element's height.
             var elem = self.steps[sectionIndex];
             var rect = elem.getBoundingClientRect();
             var elemTop = rect.top + window.pageYOffset;
-            var elemHeight = rect.height || 1; // avoid divide-by-zero
-            var rawSectionProgress = (triggerY - elemTop) / elemHeight;
-            var progress = Math.max(0, Math.min(1, rawSectionProgress));
+            var elemHeight = rect.height || 1;
+            var progress;
+            if (self.trigger === 'center') {
+                var sectionCenter = elemTop + elemHeight / 2;
+                var viewportCenter = window.pageYOffset + window.innerHeight / 2;
+                var band = window.innerHeight * 0.4;
+                progress = Math.max(0, Math.min(1, (viewportCenter - sectionCenter + band) / (2 * band)));
+            } else {
+                progress = Math.max(0, Math.min(1, (triggerY - elemTop) / elemHeight));
+            }
             // console.log('scroller: sectionIndex=', sectionIndex, ' progress=', progress.toFixed(3));
             self.onProgress(sectionIndex, progress);
         };
