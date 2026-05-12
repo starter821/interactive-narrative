@@ -14,9 +14,9 @@ function startP5() {
             w = window.innerWidth - 24;
             margin = { top: 0, left: Math.round(w * 0.07), bottom: 25, right: 8 };
         } else {
-            var container = document.querySelector('.container');
-            var cw = container ? container.offsetWidth : Math.min(window.innerWidth, 890);
-            w = Math.max(200, cw - 270);
+            var wFromWidth = Math.round(window.innerWidth * 0.70) - 20;
+            var wFromHeight = Math.round((window.innerHeight - 80) * (600 / 520));
+            w = Math.min(wFromWidth, wFromHeight);
             margin = { top: 0, left: 80, bottom: 40, right: 10 };
         }
         return { width: w, height: Math.round(w * (520 / 600)), margin: margin };

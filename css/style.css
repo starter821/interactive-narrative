@@ -1,6 +1,8 @@
 
 .container {
-  width: 890px;
+  width: 100%;
+  padding: 16px 20px;
+  box-sizing: border-box;
 }
 
 @media (max-width: 700px) {
@@ -38,14 +40,14 @@
 }
 
 #graphic {
-  padding-top: 60px;
+  padding-top: 24px;
 }
 
 
 #sections {
   position: relative;
   display: inline-block;
-  width: 250px;
+  width: 30vw;
   top: 0px;
   z-index: 90;
   padding-bottom: 200px;
@@ -53,19 +55,19 @@
 
 .step {
   margin-bottom: 200px;
-  font-family: "TiemposTextWeb-Regular","Georgia";
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
   font-size: 16px;
-  line-height: 23px;
-  color: #767678;
+  line-height: 1.65;
+  color: #222;
 }
 
 #sections .title {
-  font-family: Arial,Helvetica,"san-serif";
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 2px;
-  color: #262626;
-  line-height: 1.2em;
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #111;
+  line-height: 1.3;
 }
 
 #extra-space {
