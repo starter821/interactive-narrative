@@ -68,9 +68,29 @@ function startP5() {
             p.draw = function () {
                 p.background(255);
                 self.draw(p);
+
+                // scroll in/out transition using progress
+                var pr = self.state.progress || 0;
+                var ease = 0.18; // fraction of progress used for entry/exit
+                var tx, op;
+                if (pr < ease) {
+                    var t = pr / ease;
+                    tx = (1 - t) * 40;
+                    op = t;
+                } else if (pr > 1 - ease) {
+                    var t = (pr - (1 - ease)) / ease;
+                    tx = -t * 40;
+                    op = 1 - t;
+                } else {
+                    tx = 0;
+                    op = 1;
+                }
+                p.canvas.style.transform = 'translateY(' + tx + 'px)';
+                p.canvas.style.opacity = op;
+
                 var dbg = document.getElementById('debug-state');
                 if (dbg) {
-                    dbg.textContent = 'activeIndex: ' + (self.state.activeIndex || 0) + '   progress: ' + (self.state.progress || 0).toFixed(2);
+                    dbg.textContent = 'activeIndex: ' + (self.state.activeIndex || 0) + '   progress: ' + pr.toFixed(2);
                 }
             };
         };
