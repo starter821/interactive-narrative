@@ -81,6 +81,7 @@
                         return;
                     }
                     var sc = new ScrollerCtor(cfg.containerSelector, cfg.stepSelector, cfg.trigger);
+                    window.__scroller = sc;
                     console.log('sections: scroller created, steps=', sc.steps.length);
 
                     // create VisualController to show/hide #vis when appropriate
@@ -95,6 +96,20 @@
                         document.querySelectorAll('.step').forEach(function (el, i) {
                             el.style.opacity = (i === index) ? '1' : '0.1';
                         });
+
+                        // apply layout class from data-layout attribute
+                        var graphic = document.querySelector('#graphic');
+                        if (graphic) {
+                            graphic.classList.remove('layout-full-text', 'layout-full-viz');
+                            var layout = sc.steps[index] && sc.steps[index].dataset && sc.steps[index].dataset.layout;
+                            if (layout) graphic.classList.add('layout-' + layout);
+                            requestAnimationFrame(function () {
+                                if (window.__sketchAPI && window.__sketchAPI.p5 &&
+                                    typeof window.__sketchAPI.p5.windowResized === 'function') {
+                                    window.__sketchAPI.p5.windowResized();
+                                }
+                            });
+                        }
 
                         // Determine if the active step defines a custom active-index
                         var mappedIndex = index;

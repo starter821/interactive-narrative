@@ -130,6 +130,24 @@
   z-index: 100;
 }
 
+/* full-text layout: hide vis, expand text column */
+#graphic.layout-full-text #vis {
+  display: none;
+}
+#graphic.layout-full-text #sections {
+  width: min(70vw, 800px);
+}
+
+/* full-viz layout: keep sections in flow (preserves scroll height) but invisible */
+#graphic.layout-full-viz #sections {
+  opacity: 0;
+  pointer-events: none;
+}
+#graphic.layout-full-viz #vis {
+  left: 20px;
+  right: 20px;
+}
+
 /* visibility helpers for popup effect controlled by VisualController */
 .vis-hidden {
   opacity: 0;
