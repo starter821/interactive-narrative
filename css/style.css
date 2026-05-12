@@ -97,6 +97,10 @@
   margin-bottom: 0;
 }
 
+.step[data-layout="full-viz"]:last-child {
+  margin-bottom: 50vh;
+}
+
 .step {
   margin-bottom: 200px;
   min-height: 60vh;

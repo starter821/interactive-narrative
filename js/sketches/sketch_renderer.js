@@ -25,7 +25,7 @@
                 return;
             }
 
-            if (ai === 6  || ai === 10) {
+            if (ai === 6  || ai === 9) {
                 window.VizProgressColor.draw(p, manager, ai, progress);
                 return;
             }
