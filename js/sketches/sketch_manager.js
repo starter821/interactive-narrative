@@ -71,22 +71,31 @@ function startP5() {
 
                 // scroll in/out transition using progress
                 var pr = self.state.progress || 0;
-                var ease = 0.18; // fraction of progress used for entry/exit
+                var ease = 0.05;
+                var travel = 20;
                 var tx, op;
+                function smoothstep(t) { return t * t * (3 - 2 * t); }
                 if (pr < ease) {
-                    var t = pr / ease;
-                    tx = (1 - t) * 40;
+                    var t = smoothstep(pr / ease);
+                    tx = (1 - t) * travel;
                     op = t;
                 } else if (pr > 1 - ease) {
-                    var t = (pr - (1 - ease)) / ease;
-                    tx = -t * 40;
+                    var t = smoothstep((pr - (1 - ease)) / ease);
+                    tx = -t * travel;
                     op = 1 - t;
                 } else {
                     tx = 0;
                     op = 1;
                 }
-                p.canvas.style.transform = 'translateY(' + tx + 'px)';
-                p.canvas.style.opacity = op;
+                p.canvas.style.transform = 'translateY(' + tx.toFixed(2) + 'px)';
+                p.canvas.style.opacity = op.toFixed(3);
+
+                // mirror transition on the active text step
+                var activeStep = document.querySelector('.step[data-active-index="' + (self.state.activeIndex || 0) + '"]');
+                if (activeStep) {
+                    activeStep.style.transform = 'translateY(' + tx.toFixed(2) + 'px)';
+                    activeStep.style.opacity = op.toFixed(3);
+                }
 
                 var dbg = document.getElementById('debug-state');
                 if (dbg) {
