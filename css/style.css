@@ -130,12 +130,42 @@
   z-index: 100;
 }
 
-/* full-text layout: hide vis, expand text column */
+.author-section {
+  align-items: center;
+}
+.author-section .authors {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 60px;
+  margin: 24px 0;
+}
+.author-section .authors .author {
+  text-align: center;
+}
+.author-name {
+  font-weight: 700;
+  font-size: 16px;
+  color: #111;
+  margin-bottom: 4px;
+}
+.author-bio {
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* full-text layout: hide vis, center and expand text column */
+#graphic.layout-full-text {
+  display: flex;
+  justify-content: center;
+}
 #graphic.layout-full-text #vis {
   display: none;
 }
 #graphic.layout-full-text #sections {
   width: min(70vw, 800px);
+  display: block;
 }
 
 /* full-viz layout: keep sections in flow (preserves scroll height) but invisible */
