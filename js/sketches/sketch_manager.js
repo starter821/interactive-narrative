@@ -27,6 +27,13 @@ function startP5() {
             p.setup = function () {
                 var parent = document.getElementById('vis');
                 parent.innerHTML = '';
+                if (window.innerWidth <= 700) {
+                    self.width = window.innerWidth - 24;
+                    self.height = Math.round(self.width * (520 / 600));
+                    self.margin = { top: 0, left: 40, bottom: 30, right: 10 };
+                    self.canvasWidth = self.width;
+                    self.canvasHeight = self.height;
+                }
                 p.createCanvas(self.canvasWidth, self.canvasHeight).parent('vis');
                 p.noStroke();
                 p.frameRate(30);
