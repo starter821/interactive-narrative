@@ -16,7 +16,7 @@ function startP5() {
             h = Math.round(w * (520 / 600));
         } else {
             margin = { top: 0, left: 80, bottom: 4, right: 10 };
-            var availW = Math.round(window.innerWidth * 0.70) - 40 - margin.left - margin.right;
+            var availW = Math.round(window.innerWidth * 0.70) - 60 - margin.left - margin.right;
             var wFromHeight = Math.round((window.innerHeight - 120) * (600 / 520)) - margin.left - margin.right;
             w = Math.min(availW, wFromHeight);
             h = Math.round(w * (520 / 600));
