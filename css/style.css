@@ -1,8 +1,40 @@
 
+#site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px 0 0;
+  z-index: 200;
+}
+
+#site-title {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  white-space: nowrap;
+  padding: 0 16px;
+}
+
+#site-course {
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 13px;
+  color: #888;
+  white-space: nowrap;
+}
+
 .container {
   width: 100%;
   padding: 16px 20px;
   box-sizing: border-box;
+  margin-top: 52px;
 }
 
 @media (max-width: 700px) {
@@ -22,7 +54,7 @@
   }
   #vis {
     position: sticky;
-    top: 0;
+    top: 52px;
     width: 100%;
     z-index: 100;
     background: white;
@@ -77,7 +109,7 @@
 #vis {
   display: inline-block;
   position: fixed;
-  top: 60px;
+  top: 68px;
   z-index: 100;
   margin-left: 0;
   /* height: 600px; */
