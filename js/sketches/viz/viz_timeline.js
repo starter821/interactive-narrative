@@ -27,13 +27,28 @@
             p.strokeWeight(2);
             p.line(lineX, lineTop, lineX, lineBottom);
 
-            // dots
+            // dots and labels
             events.forEach((ev, i) => {
                 const y = lineTop + i * step;
                 const col = ev.type === 'economic' ? p.color('orange') : p.color('#2DA3EE');
+
+                // dot
                 p.fill(col);
                 p.noStroke();
                 p.circle(lineX, y, 12);
+
+                // year 
+                p.fill(col);
+                p.noStroke();
+                p.textSize(15);
+                p.textAlign(p.LEFT, p.CENTER);
+                p.text(ev.year, lineX + 20, y - 8);
+
+                // label 
+                p.fill(220);
+                p.textSize(14);
+                p.textAlign(p.LEFT, p.CENTER);
+                p.text(ev.label, lineX + 20, y + 10);
             });
         }
     };
