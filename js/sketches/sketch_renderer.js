@@ -39,6 +39,11 @@
                 window.VizBar.draw(p, manager, ai, progress);
                 return;
             }
+
+            if (ai === 3) {
+                window.FirstViz.draw(p, manager, ai, progress);
+                return;
+            }
         }
     };
 })();
