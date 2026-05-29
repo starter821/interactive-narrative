@@ -5,9 +5,12 @@
     window.Renderer = {
 
         preload: function (p) {
-            // Always preload VizLineChart since it's used in early sections
+            // Preload all visualizations that need data loading
             if (window.VizLineChart && window.VizLineChart.preload) {
                 window.VizLineChart.preload(p);
+            }
+            if (window.FirstViz && window.FirstViz.preload) {
+                window.FirstVi2.preload(p);
             }
         },
 
@@ -42,13 +45,13 @@
                 return;
             }
 
-            if (ai === 7) {
+            if (ai === 8) {
                 window.VizTimeline.draw(p, manager, ai, progress);
                 return;
             }
 
             if (ai === 3) {
-                window.FirstViz.draw(p, manager, ai, progress);
+                window.FirstViz2.draw(p, manager, ai, progress);
                 return;
             }
         }
