@@ -45,6 +45,13 @@ function startP5() {
         // create the p5 instance bound to this manager
         var self = this;
         var sketch = function (p) {
+            p.preload = function () {
+                // Call preload for the current renderer if it exists
+                if (localRenderer && localRenderer.preload) {
+                    localRenderer.preload(p);
+                }
+            };
+
             p.setup = function () {
                 var parent = document.getElementById('vis');
                 parent.innerHTML = '';

@@ -4,6 +4,13 @@
 (function () {
     window.Renderer = {
 
+        preload: function (p) {
+            // Always preload VizLineChart since it's used in early sections
+            if (window.VizLineChart && window.VizLineChart.preload) {
+                window.VizLineChart.preload(p);
+            }
+        },
+
         setData: function (manager) {
             var self = this;
 
@@ -20,8 +27,8 @@
 
         draw: function (p, manager, ai, progress) {
 
-            if (ai === 0 || ai === 1) {
-                window.VizTitle.draw(p, manager, ai, progress);
+            if (ai === 1) {
+                window.VizLineChart.draw(p, manager, ai, progress);
                 return;
             }
 
