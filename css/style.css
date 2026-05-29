@@ -83,6 +83,9 @@
   padding-top: 24px;
 }
 
+#vis {
+  background-color: #000;
+}
 
 #sections {
   position: relative;

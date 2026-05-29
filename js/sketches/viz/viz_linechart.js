@@ -69,6 +69,76 @@
             const xMap = i => ox + pad.left + (i / (seattleData.length - 1)) * gW;
             const yMap = v => oy + pad.top + gH - ((v - minV) / (maxV - minV)) * gH;
 
+            //#region axes and labels
+            // y axis
+            p.textSize(11);
+            p.textAlign(p.RIGHT, p.CENTER);
+            for (let v = 0; v <= 120; v += 20) {
+                const y = yMap(v);
+                // tick
+                p.stroke(220);
+                p.strokeWeight(1);
+                p.line(ox + pad.left - 5, y, ox + pad.left, y);
+                // gridline
+                p.stroke(80);
+                p.line(ox + pad.left, y, ox + pad.left + gW, y);
+                // label
+                p.noStroke();
+                p.fill(220);
+                p.text(v + '%', ox + pad.left - 8, y);
+            }
+
+            // axis line
+            p.stroke(220)
+            p.strokeWeight(1);
+            p.line(ox + pad.left, oy + pad.top - gH/10, ox + pad.left, oy + pad.top + gH);
+
+            // y axis label
+            p.push();
+            p.translate(ox + 15, oy + pad.top + gH / 2);
+            p.rotate(-Math.PI / 2);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.noStroke();
+            p.textSize(14);
+            p.text('Percent Change', 0, 0);
+            p.pop();
+
+            // x axis 
+            const startYear = 2000;
+            const endYear = 2026;
+            p.textAlign(p.CENTER, p.TOP);
+            p.textSize(11);
+
+            for (let year = startYear; year <= endYear; year += 5) {
+                // find index of Feb of that year (since data starts Feb 2000)
+                const dateStr = year + '-02';
+                const idx = seattleData.findIndex(d => d.date === dateStr);
+                if (idx === -1) continue;
+                const x = xMap(idx);
+
+                // tick
+                p.stroke(180);
+                p.strokeWeight(1);
+                p.line(x, oy + pad.top + gH, x, oy + pad.top + gH + 5);
+
+                p.line(ox + pad.left, oy + pad.top + gH, ox + pad.left + gW, oy + pad.top + gH);
+
+                // label
+                p.noStroke();
+                p.fill(220);
+                p.text(year, x, oy + pad.top + gH + 8);
+            }
+
+            // x axis label
+            p.textAlign(p.CENTER, p.TOP);
+            p.textSize(14);
+            p.fill(220);
+            p.noStroke();
+            p.text('Year', ox + pad.left + gW / 2, oy + pad.top + gH + 30);
+
+            //#endregion
+
+
             function drawLine(data, col, dashed) {
                 p.stroke(col);
                 p.strokeWeight(2);
@@ -115,4 +185,5 @@
 
         },
 
-   } }) ();
+    }
+})();

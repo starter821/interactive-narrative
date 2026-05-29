@@ -73,7 +73,7 @@ function startP5() {
             };
 
             p.draw = function () {
-                p.background(255);
+                p.background(0);
                 self.draw(p);
 
                 // scroll in/out transition using progress
