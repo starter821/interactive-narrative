@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
- 
+
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IMT 561 Data Visualization: Design and Development</title>
@@ -17,13 +17,24 @@
   <div class="container">
     <div id='graphic'>
       <div id='sections'>
-        <section class="step" data-active-index="0">
+        <section class="step" data-active-index="0" data-layout="full-text">
           <div class="title">Is Washington State Still Affordable?</div>
-          Over the past several years in Washington State, the cost of living has risen significantly due to inflation, rising housing
-costs, supply chain disruptions, and broader economic shifts. Wages have also increased, but for many workers they have
-not kept pace with essential expenses. This has widened the gap between earnings and the cost of maintaining a basic
-standard of living. This article examines these trends by analyzing changes in inflation, living costs, and wages over time,
-and explores how these shifts have shaped the affordability and economic policy in Washington State.
+          Over the past several years, Washington State has experienced a sharp increase in the cost of living driven by
+          inflation, rising housing prices, supply chain disruptions, and broader economic changes. Although wages have
+          increased during this period, many workers have struggled to keep up with rising costs for housing, food,
+          transportation, and other necessities. As a result, the gap between income and basic living expenses has
+          widened for many residents. This article analyzes trends in inflation, wages, and living costs in Washington
+          State and examines how these economic changes have affected affordability and influenced policy discussions
+          surrounding wages and cost of living.
+          <br /><br />
+          <b>Important Notes About the Data:</b>
+          The Seattle data is sourced from the Consumer Price Index (CPI) published by
+          the U.S. Bureau of Labor Statistics (BLS) for the Seattle-Tacoma-Bellevue metropolitan area. The CPI measures
+          average changes in prices for a fixed basket of goods and services over time. CPI data does not represent
+          absolute price levels across cities, but rather changes in prices within each region relative to its own base
+          period. The data is bimonthly and not seasonally adjusted, so short-term fluctuations may reflect seasonal
+          effects.
+
         </section>
         <section class="step" data-active-index="1">
           <div class="title">Viz1: Inflation Trend</div>
@@ -51,9 +62,10 @@ and explores how these shifts have shaped the affordability and economic policy 
         <div id="extra-space">
         </div>
         <section class="step" data-active-index="6" data-layout="full-text">
-          <div class="title">No Viz</div>
-          When housing and basic expenses rise faster than paychecks, states respond in two directions:
-reduce what households pay, or increase what households keep.
+          <div class="title">When housing and basic expenses rise faster than paychecks, states respond in two
+            directions:
+            reduce what households pay, or increase what households keep.</div>
+
         </section>
         <section class="step" data-active-index="7">
           <div class="title">Viz6: Statewide Rent Increase Cap (H B1217)</div>
@@ -61,11 +73,22 @@ reduce what households pay, or increase what households keep.
         </section>
         <section class="step" data-active-index="8">
           <div class="title">Viz7: Working Families Tax Credit</div>
-          Add <code>data-layout="full-text"</code> to a section to hide the visualization and
+          <!-- Add <code>data-layout="full-text"</code> to a section to hide the visualization and
           give the text the full width of the screen. Use this for introductions, transitions,
           or any moment where the data should step aside and the writing takes center stage.<br /><br />
           This is a good place for a pull quote, a key finding stated plainly, or a paragraph
-          that needs room to breathe without competing with a chart.
+          that needs room to breathe without competing with a chart. -->
+          Washington State created the Working Families Tax Credit (WFTC) in 2008 to help offset the tax burden on
+          low-income workers. Modeled after the federal Earned Income Tax Credit, the program was designed to return
+          some sales tax revenue to low- and moderate-income households. Because Washington does not have a state income
+          tax, lower-income residents often pay a larger share of their income through sales taxes.
+          Although the law passed in 2008, the program went unfunded for more than a decade. During that time,
+          Washington experienced the 2008 financial crisis, rising housing costs, and increasing living expenses. In
+          2021, as inflation and living costs surged following the COVID-19 pandemic, the legislature finally funded the
+          credit. The first payments were distributed in 2023. Today, the program is managed by the Washington State
+          Department of Revenue and aims to support the financial stability of low- and moderate-income residents across
+          the state.
+
         </section>
         <section class="step" data-active-index="9" data-layout="full-viz">
           <div class="title">Full-visualization section</div>
@@ -79,15 +102,18 @@ reduce what households pay, or increase what households keep.
           <div class="authors">
             <div class="author">
               <div class="author-name">Sunghee Park</div>
-              <div class="author-bio">I am a senior in Informatics Program at the University of Washington Describe your background, research interests, or role in this project.</div>
+              <div class="author-bio">I am a senior in Informatics Program at the University of Washington Describe your
+                background, research interests, or role in this project.</div>
             </div>
             <div class="author">
               <div class="author-name">Christie Dong</div>
-              <div class="author-bio">I am a master's student in Information Management at the University of Washington, focusing on data analytics and human-centered AI.
+              <div class="author-bio">I am a master's student in Information Management at the University of Washington,
+                focusing on data analytics and human-centered AI.
 
-This quarter I want to improve my skills in interactive visualization and storytelling with data.
+                This quarter I want to improve my skills in interactive visualization and storytelling with data.
 
-One topic I am excited to visualize is fitness and health data, because I am interested in how data can make everyday experiences like exercise more intuitive and engaging.</div>
+                One topic I am excited to visualize is fitness and health data, because I am interested in how data can
+                make everyday experiences like exercise more intuitive and engaging.</div>
             </div>
           </div>
         </section>
@@ -123,7 +149,7 @@ One topic I am excited to visualize is fitness and health data, because I am int
   <script src="js/sketches/viz/viz_progress_color.js"></script>
   <script src="js/sketches/viz/viz_scatter.js"></script>
   <script src="js/sketches/viz/viz_bar.js"></script>
-  <script src="js/sketches/viz/viz_first.js"></script>
+  <script src="js/sketches/viz/viz_first_trial.js"></script>
   <script src="js/sketches/sketch_renderer.js"></script>
 
 </body>

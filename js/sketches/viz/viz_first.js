@@ -1,49 +1,34 @@
-window.FirstViz = {
-  draw(p, manager, ai, progress) {
+(function () {
+  // State variables persisted outside draw function
+  let fromIdx = 0, toIdx = 0, animT = 1.0, dragging = false, sliderPx = 0;
 
-    const YEARS = [2006,2011,2016,2021,2026];
-    const ITEMS = ['Bananas','Beef','Bread','Chicken','Eggs','Milk','Oranges','Tomatoes'];
-    const UNITS = {Bananas:'lb',Beef:'lb',Bread:'lb',Chicken:'lb',Eggs:'doz',Milk:'gal',Oranges:'lb',Tomatoes:'lb'};
-    const RAW = {
-      2006:{Bananas:{p:.535,q:3},  Beef:{p:2.723,q:.5},Bread:{p:1.173,q:2},Chicken:{p:1.124,q:3},  Eggs:{p:1.381,q:2},Milk:{p:3.261,q:1},Oranges:{p:1.108,q:1.5},Tomatoes:{p:1.792,q:2}},
-      2011:{Bananas:{p:.630,q:2},  Beef:{p:3.287,q:0}, Bread:{p:1.491,q:2},Chicken:{p:1.332,q:3},  Eggs:{p:1.825,q:2},Milk:{p:3.685,q:1},Oranges:{p:1.130,q:.5}, Tomatoes:{p:1.720,q:2}},
-      2016:{Bananas:{p:.590,q:2},  Beef:{p:3.961,q:0}, Bread:{p:1.413,q:2},Chicken:{p:1.508,q:3},  Eggs:{p:1.735,q:2},Milk:{p:3.301,q:1},Oranges:{p:1.284,q:.5}, Tomatoes:{p:1.983,q:2}},
-      2021:{Bananas:{p:.642,q:2},  Beef:{p:4.875,q:0}, Bread:{p:1.629,q:2},Chicken:{p:1.632,q:2},  Eggs:{p:1.790,q:2},Milk:{p:3.790,q:1},Oranges:{p:1.092,q:0},  Tomatoes:{p:1.977,q:2}},
-      2026:{Bananas:{p:.690,q:0},  Beef:{p:7.119,q:0}, Bread:{p:1.943,q:2},Chicken:{p:2.149,q:1},  Eggs:{p:2.553,q:2},Milk:{p:4.306,q:1},Oranges:{p:1.591,q:0},  Tomatoes:{p:2.274,q:2}},
-    };
-    const IC = {
-      Bananas:[240,200,38], Beef:[168,62,52],   Bread:[192,140,80], Chicken:[215,172,110],
-      Eggs:[245,238,222],   Milk:[208,230,248], Oranges:[228,118,40], Tomatoes:[202,60,50],
-    };
+  const YEARS = [2006, 2011, 2016, 2021, 2026];
+  const ITEMS = ['Bananas', 'Beef', 'Bread', 'Chicken', 'Eggs', 'Milk', 'Oranges', 'Tomatoes'];
+  const UNITS = { Bananas: 'lb', Beef: 'lb', Bread: 'lb', Chicken: 'lb', Eggs: 'doz', Milk: 'gal', Oranges: 'lb', Tomatoes: 'lb' };
+  const RAW = {
+    2006: { Bananas: { p: .535, q: 3 }, Beef: { p: 2.723, q: .5 }, Bread: { p: 1.173, q: 2 }, Chicken: { p: 1.124, q: 3 }, Eggs: { p: 1.381, q: 2 }, Milk: { p: 3.261, q: 1 }, Oranges: { p: 1.108, q: 1.5 }, Tomatoes: { p: 1.792, q: 2 } },
+    2011: { Bananas: { p: .630, q: 2 }, Beef: { p: 3.287, q: 0 }, Bread: { p: 1.491, q: 2 }, Chicken: { p: 1.332, q: 3 }, Eggs: { p: 1.825, q: 2 }, Milk: { p: 3.685, q: 1 }, Oranges: { p: 1.130, q: .5 }, Tomatoes: { p: 1.720, q: 2 } },
+    2016: { Bananas: { p: .590, q: 2 }, Beef: { p: 3.961, q: 0 }, Bread: { p: 1.413, q: 2 }, Chicken: { p: 1.508, q: 3 }, Eggs: { p: 1.735, q: 2 }, Milk: { p: 3.301, q: 1 }, Oranges: { p: 1.284, q: .5 }, Tomatoes: { p: 1.983, q: 2 } },
+    2021: { Bananas: { p: .642, q: 2 }, Beef: { p: 4.875, q: 0 }, Bread: { p: 1.629, q: 2 }, Chicken: { p: 1.632, q: 2 }, Eggs: { p: 1.790, q: 2 }, Milk: { p: 3.790, q: 1 }, Oranges: { p: 1.092, q: 0 }, Tomatoes: { p: 1.977, q: 2 } },
+    2026: { Bananas: { p: .690, q: 0 }, Beef: { p: 7.119, q: 0 }, Bread: { p: 1.943, q: 2 }, Chicken: { p: 2.149, q: 1 }, Eggs: { p: 2.553, q: 2 }, Milk: { p: 4.306, q: 1 }, Oranges: { p: 1.591, q: 0 }, Tomatoes: { p: 2.274, q: 2 } },
+  };
+  const IC = {
+    Bananas: [240, 200, 38], Beef: [168, 62, 52], Bread: [192, 140, 80], Chicken: [215, 172, 110],
+    Eggs: [245, 238, 222], Milk: [208, 230, 248], Oranges: [228, 118, 40], Tomatoes: [202, 60, 50],
+  };
 
-    const W=920, H=580;
-    const SL={x1:80,x2:840,y:72};
-    const BK={cx:210,cy:558,bw:344,bh:302};
-    const RC={rx:440,ry:98,rw:462,rh:463};
+  const W = 920, H = 580;
+  const SL = { x1: 80, x2: 840, y: 72 };
+  const BK = { cx: 210, cy: 558, bw: 344, bh: 302 };
+  const RC = { rx: 440, ry: 98, rw: 462, rh: 463 };
 
-    let fromIdx=0,toIdx=0,animT=1.0,dragging=false,sliderPx=0;
-
-    function xForIdx(i){return SL.x1+(SL.x2-SL.x1)*i/(YEARS.length-1);}
-    function idxForX(x){return Math.round(p.constrain((x-SL.x1)/(SL.x2-SL.x1)*(YEARS.length-1),0,YEARS.length-1));}
-    function interp(){
-      let out={}, t=p.constrain(animT,0,1);
-      for(let k of ITEMS){let a=RAW[YEARS[fromIdx]][k],b=RAW[YEARS[toIdx]][k];out[k]={price:p.lerp(a.p,b.p,t),qty:p.lerp(a.q,b.q,t)};}
-      return out;
-    }
-
-    p.setup=function(){
-      p.createCanvas(W,H);
-      sliderPx=xForIdx(0);
-    };
-
-    p.draw=function(){
-      animT=Math.min(1.0,animT+0.04);
-      sliderPx+=(xForIdx(toIdx)-sliderPx)*0.12;
-      let cd=interp();
-      let yr=Math.round(p.lerp(YEARS[fromIdx],YEARS[toIdx],animT));
-      p.background('#f5ede0');
-      _header(yr); _slider(); _basket(cd); _recipe(cd,yr);
-    };
+  function xForIdx(i) { return SL.x1 + (SL.x2 - SL.x1) * i / (YEARS.length - 1); }
+  function idxForX(x, p) { return Math.round(p.constrain((x - SL.x1) / (SL.x2 - SL.x1) * (YEARS.length - 1), 0, YEARS.length - 1)); }
+  function interp(p) {
+    let out = {}, t = p.constrain(animT, 0, 1);
+    for (let k of ITEMS) { let a = RAW[YEARS[fromIdx]][k], b = RAW[YEARS[toIdx]][k]; out[k] = { price: p.lerp(a.p, b.p, t), qty: p.lerp(a.q, b.q, t) }; }
+    return out;
+  }
 
     function _header(yr){
       p.noStroke(); p.fill('#3d2b1f'); p.rect(0,0,W,50);
