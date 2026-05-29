@@ -32,7 +32,7 @@
                 return;
             }
 
-            if (ai === 6  || ai === 9) {
+            if (ai === 6 || ai === 9) {
                 window.VizProgressColor.draw(p, manager, ai, progress);
                 return;
             }
@@ -43,7 +43,7 @@
             }
 
             if (ai === 7) {
-                window.VizBar.draw(p, manager, ai, progress);
+                window.VizTimeline.draw(p, manager, ai, progress);
                 return;
             }
         }
