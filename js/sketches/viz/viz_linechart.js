@@ -7,6 +7,7 @@
     let usData = [];
     let activeMode = 'pct2000';
     let isInitialized = false;
+    let lastPressed = false;
 
     window.VizLineChart = {
         preload: function (p) {
@@ -69,6 +70,9 @@
             const xMap = i => ox + pad.left + (i / (seattleData.length - 1)) * gW;
             const yMap = v => oy + pad.top + gH - ((v - minV) / (maxV - minV)) * gH;
 
+            // Helper function to apply y-axis offset for pct_yoy mode
+            const getDisplayY = (y) => activeMode === 'pct_yoy' ? y - 20 : y;
+
 
             //#region buttons
             const btn1X = ox + pad.left - 30;
@@ -98,27 +102,61 @@
             p.textAlign(p.CENTER, p.CENTER);
             p.text('Inflation Rate', btn2X + btnW / 2, btnY + btnH / 2);
 
+            // click detection
+            const pressed = p.mouseIsPressed;
+            if (pressed && !lastPressed) {
+                const mx2 = p.mouseX;
+                const my2 = p.mouseY;
+
+                if (mx2 >= btn1X && mx2 <= btn1X + btnW &&
+                    my2 >= btnY && my2 <= btnY + btnH) {
+                    activeMode = 'pct2000';
+                }
+
+                if (mx2 >= btn2X && mx2 <= btn2X + btnW &&
+                    my2 >= btnY && my2 <= btnY + btnH) {
+                    activeMode = 'pct_yoy';
+                }
+            }
+            lastPressed = pressed;
+
             //#endregion
             //#region axes and labels
 
             // title
+            const title = activeMode === 'pct2000' ? 'Cumulative Price Change 2000 - 2026' : 'Year-over-Year Inflation Rate 2000 - 2026';
             p.noStroke();
             p.fill(255);
             p.textSize(20);
             p.textStyle(p.NORMAL);
             p.textAlign(p.CENTER, p.TOP);
-            p.text('Cumulative Price Change 2000 - 2026', ox + pad.left + gW / 2, oy + 60);
+            p.text(title, ox + pad.left + gW / 2, oy + 60);
 
             // y axis
             p.textSize(11);
             p.textAlign(p.RIGHT, p.CENTER);
-            for (let v = 0; v <= 120; v += 20) {
-                const y = yMap(v);
+            // round to nice intervals
+            let tickMin, tickMax, interval;
+            if (activeMode === 'pct2000') {
+                tickMin = 0;
+                tickMax = 120;
+                interval = 20;
+            } else {
+                tickMin = -2;
+                tickMax = 10;
+                interval = 2;
+            }
+
+            const rawRange = tickMax - tickMin;
+            interval = rawRange > 50 ? 20 : rawRange > 20 ? 5 : 2;
+
+            for (let v = tickMin; v <= tickMax; v += interval) {
+                let y = getDisplayY(yMap(v));
                 // tick
                 p.stroke(220);
                 p.strokeWeight(1);
                 p.line(ox + pad.left - 5, y, ox + pad.left, y);
-                // gridline
+                // grid line
                 p.stroke(80);
                 p.line(ox + pad.left, y, ox + pad.left + gW, y);
                 // label
@@ -133,13 +171,14 @@
             p.line(ox + pad.left, oy + pad.top - gH / 10, ox + pad.left, oy + pad.top + gH);
 
             // y axis label
+            const yLabel = activeMode === 'pct2000' ? 'Cumulative % Change' : 'Inflation Rate (%)';
             p.push();
             p.translate(ox - 30, oy + pad.top + gH / 2);
             p.rotate(-Math.PI / 2);
             p.textAlign(p.CENTER, p.CENTER);
             p.noStroke();
             p.textSize(14);
-            p.text('Percent Change', 0, 0);
+            p.text(yLabel, 0, 0);
             p.pop();
 
             // x axis 
@@ -188,8 +227,8 @@
                         const v1 = getVal(data[i - 1]);
                         const v2 = getVal(data[i]);
                         if (isNaN(v1) || isNaN(v2)) continue;
-                        const x1 = xMap(i - 1), y1 = yMap(v1);
-                        const x2 = xMap(i), y2 = yMap(v2);
+                        const x1 = xMap(i - 1), y1 = getDisplayY(yMap(v1));
+                        const x2 = xMap(i), y2 = getDisplayY(yMap(v2));
                         const dx = x2 - x1, dy = y2 - y1;
                         const segLen = Math.sqrt(dx * dx + dy * dy);
                         let t = 0;
@@ -211,7 +250,7 @@
                     p.beginShape();
                     data.forEach((d, i) => {
                         const v = activeMode === 'pct2000' ? d.pct_from_2000 : d.pct_yoy;
-                        if (!isNaN(v)) p.vertex(xMap(i), yMap(v));
+                        if (!isNaN(v)) p.vertex(xMap(i), getDisplayY(yMap(v)));
                     });
                     p.endShape();
                 }
@@ -244,20 +283,20 @@
                 // vertical line
                 p.stroke(150);
                 p.strokeWeight(1);
-                p.line(xMap(clampedIdx), oy + pad.top - 24, xMap(clampedIdx), oy + pad.top + gH);
+                p.line(xMap(clampedIdx), getDisplayY(oy + pad.top - 24), xMap(clampedIdx), getDisplayY(oy + pad.top + gH));
 
                 // dot on seattle line
                 if (!isNaN(seattleV)) {
                     p.fill(p.color('#2DA3EE'));
                     p.noStroke();
-                    p.circle(xMap(clampedIdx), yMap(seattleV), 10);
+                    p.circle(xMap(clampedIdx), getDisplayY(yMap(seattleV)), 10);
                 }
 
                 // dot on us line
                 if (!isNaN(usV)) {
                     p.fill(p.color('orange'));
                     p.noStroke();
-                    p.circle(xMap(clampedIdx), yMap(usV), 10);
+                    p.circle(xMap(clampedIdx), getDisplayY(yMap(usV)), 10);
                 }
 
                 // annotation box
