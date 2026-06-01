@@ -88,7 +88,7 @@
             p.rect(btn1X, btnY, btnW, btnH, 4);
             p.noStroke();
             p.fill(activeMode === 'pct2000' ? 255 : 160);
-            p.textSize(11);
+            p.textSize(12);
             p.textAlign(p.CENTER, p.CENTER);
             p.text('Cumulative Price Change', btn1X + btnW / 2, btnY + btnH / 2);
 
@@ -345,11 +345,11 @@
                 p.text(isNaN(seattleV) ? 'N/A' : seattleV.toFixed(1) + '%', bx + boxW - boxPad, by + 46);
             }
 
-            //#region legend
+            //#region legend + slider
             const legX = ox + pad.left + gW + 10;
             const legY = oy + pad.top + 10;
             const legW = 145;
-            const legH = 50;
+            const legH = 110; 
 
             // box
             p.fill(30);
@@ -357,7 +357,7 @@
             p.strokeWeight(1);
             p.rect(legX, legY, legW, legH, 4);
 
-            // US line sample — dashed orange
+            // US line 
             p.stroke(p.color('orange'));
             p.strokeWeight(2);
             const dashLen = 3, gapLen = 4.5;
@@ -374,7 +374,7 @@
             p.textSize(11);
             p.text('United States', legX + 40, legY + 18);
 
-            // Seattle line sample — solid blue
+            // Seattle line 
             p.stroke(p.color('#2DA3EE'));
             p.strokeWeight(2);
             p.line(legX + 10, legY + 35, legX + 35, legY + 35);
@@ -382,13 +382,50 @@
             p.fill(220);
             p.text('Seattle Metro', legX + 40, legY + 35);
 
+            // slider 
+            const sliderPad = 12;
+            const trackY = legY + 75;
+            const trackX1 = legX + sliderPad;
+            const trackX2 = legX + legW - sliderPad;
+            const trackLen = trackX2 - trackX1;
+            const yearMin = 2000;
+            const yearMax = 2026;
+
+            // track background
+            p.stroke(80);
+            p.strokeWeight(3);
+            p.line(trackX1, trackY, trackX2, trackY);
+
+            // handles
+            const handle1X = trackX1 + ((2000 - yearMin) / (yearMax - yearMin)) * trackLen;
+            const handle2X = trackX1 + ((2026 - yearMin) / (yearMax - yearMin)) * trackLen;
+
+            // active track between handles
+            p.stroke(p.color('#2DA3EE'));
+            p.strokeWeight(3);
+            p.line(handle1X, trackY, handle2X, trackY);
+
+            // handle circles
+            p.fill(255);
+            p.noStroke();
+            p.circle(handle1X, trackY, 12);
+            p.circle(handle2X, trackY, 12);
+
+            // year labels under handles
+            p.fill(180);
+            p.textSize(9);
+            p.textAlign(p.CENTER, p.TOP);
+            p.text('2000', handle1X, trackY + 8);
+            p.text('2026', handle2X, trackY + 8);
+
+            // slider label
+            p.fill(220);
+            p.textSize(11);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text('Range', legX + legW / 2, legY + 58);
+
             //#endregion
 
-            // debug canvas outline
-            p.noFill();
-            p.stroke(255, 0, 0);
-            p.strokeWeight(1);
-            p.rect(ox, oy, W, H);
 
         },
 
