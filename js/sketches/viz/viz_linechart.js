@@ -53,7 +53,7 @@
             const oy = manager.offsetY || 0;
             const W = manager.width || 600;
             const H = manager.height || 520;
-            const pad = { top: 70, right: 170, bottom: 60, left: 30 };
+            const pad = { top: 150, right: 170, bottom: 40, left: 30 };
             const gW = W - pad.left - pad.right;
             const gH = H - pad.top - pad.bottom;
 
@@ -69,14 +69,45 @@
             const xMap = i => ox + pad.left + (i / (seattleData.length - 1)) * gW;
             const yMap = v => oy + pad.top + gH - ((v - minV) / (maxV - minV)) * gH;
 
+
+            //#region buttons
+            const btn1X = ox + pad.left - 30;
+            const btn2X = ox + pad.left + 130;
+            const btnY = oy + pad.top - 150;
+            const btnW = 150;
+            const btnH = 30;
+
+            // button 1 -- cumulative
+            p.fill(activeMode === 'pct2000' ? p.color('#2DA3EE') : p.color(50));
+            p.stroke(activeMode === 'pct2000' ? p.color('#2DA3EE') : p.color(120));
+            p.strokeWeight(1);
+            p.rect(btn1X, btnY, btnW, btnH, 4);
+            p.noStroke();
+            p.fill(activeMode === 'pct2000' ? 255 : 160);
+            p.textSize(11);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text('Cumulative Price Change', btn1X + btnW / 2, btnY + btnH / 2);
+
+            // button 2 -- inflation rate
+            p.fill(activeMode === 'pct_yoy' ? p.color('#2DA3EE') : p.color(50));
+            p.stroke(activeMode === 'pct_yoy' ? p.color('#2DA3EE') : p.color(120));
+            p.strokeWeight(1);
+            p.rect(btn2X, btnY, btnW, btnH, 4);
+            p.noStroke();
+            p.fill(activeMode === 'pct_yoy' ? 255 : 160);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text('Inflation Rate', btn2X + btnW / 2, btnY + btnH / 2);
+
+            //#endregion
             //#region axes and labels
 
             // title
             p.noStroke();
             p.fill(255);
             p.textSize(20);
+            p.textStyle(p.NORMAL);
             p.textAlign(p.CENTER, p.TOP);
-            p.text('Cumulative Price Change 2000 - 2025', ox + pad.left + gW / 2, oy);
+            p.text('Cumulative Price Change 2000 - 2026', ox + pad.left + gW / 2, oy + 60);
 
             // y axis
             p.textSize(11);
@@ -313,6 +344,12 @@
             p.text('Seattle Metro', legX + 40, legY + 35);
 
             //#endregion
+
+            // debug canvas outline
+            p.noFill();
+            p.stroke(255, 0, 0);
+            p.strokeWeight(1);
+            p.rect(ox, oy, W, H);
 
         },
 
