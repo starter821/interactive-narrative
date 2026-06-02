@@ -8,6 +8,9 @@
     let activeMode = 'pct2000';
     let isInitialized = false;
     let lastPressed = false;
+    let sliderStartYear = 2000;
+    let sliderEndYear = 2026;
+    let draggingHandle = null;
 
     window.VizLineChart = {
         preload: function (p) {
@@ -349,7 +352,40 @@
             const legX = ox + pad.left + gW + 10;
             const legY = oy + pad.top + 10;
             const legW = 145;
-            const legH = 110; 
+            const legH = 110;
+            const sliderPad = 12;
+            const trackY = legY + 75;
+            const trackX1 = legX + sliderPad;
+            const trackX2 = legX + legW - sliderPad;
+            const trackLen = trackX2 - trackX1;
+            const yearMin = 2000;
+            const yearMax = 2026;
+            const handle1X = trackX1 + ((sliderStartYear - yearMin) / (yearMax - yearMin)) * trackLen;
+            const handle2X = trackX1 + ((sliderEndYear - yearMin) / (yearMax - yearMin)) * trackLen;
+
+            // slider drag logic
+            const handleRadius = 8;
+            if (p.mouseIsPressed) {
+                if (draggingHandle === null) {
+                    if (Math.abs(p.mouseX - handle1X) < handleRadius + 4 &&
+                        Math.abs(p.mouseY - trackY) < handleRadius + 4) {
+                        draggingHandle = 'start';
+                    } else if (Math.abs(p.mouseX - handle2X) < handleRadius + 4 &&
+                        Math.abs(p.mouseY - trackY) < handleRadius + 4) {
+                        draggingHandle = 'end';
+                    }
+                }
+                if (draggingHandle === 'start') {
+                    const rawYear = yearMin + ((p.mouseX - trackX1) / trackLen) * (yearMax - yearMin);
+                    sliderStartYear = Math.round(Math.min(Math.max(rawYear, yearMin), sliderEndYear - 1));
+                }
+                if (draggingHandle === 'end') {
+                    const rawYear = yearMin + ((p.mouseX - trackX1) / trackLen) * (yearMax - yearMin);
+                    sliderEndYear = Math.round(Math.min(Math.max(rawYear, sliderStartYear + 1), yearMax));
+                }
+            } else {
+                draggingHandle = null;
+            }
 
             // box
             p.fill(30);
@@ -357,7 +393,7 @@
             p.strokeWeight(1);
             p.rect(legX, legY, legW, legH, 4);
 
-            // US line 
+            // US line sample -- dashed orange
             p.stroke(p.color('orange'));
             p.strokeWeight(2);
             const dashLen = 3, gapLen = 4.5;
@@ -374,7 +410,7 @@
             p.textSize(11);
             p.text('United States', legX + 40, legY + 18);
 
-            // Seattle line 
+            // Seattle line sample -- solid blue
             p.stroke(p.color('#2DA3EE'));
             p.strokeWeight(2);
             p.line(legX + 10, legY + 35, legX + 35, legY + 35);
@@ -382,23 +418,16 @@
             p.fill(220);
             p.text('Seattle Metro', legX + 40, legY + 35);
 
-            // slider 
-            const sliderPad = 12;
-            const trackY = legY + 75;
-            const trackX1 = legX + sliderPad;
-            const trackX2 = legX + legW - sliderPad;
-            const trackLen = trackX2 - trackX1;
-            const yearMin = 2000;
-            const yearMax = 2026;
+            // 'Range'
+            p.fill(150);
+            p.textSize(9);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text('Range', legX + legW / 2, legY + 58);
 
             // track background
             p.stroke(80);
             p.strokeWeight(3);
             p.line(trackX1, trackY, trackX2, trackY);
-
-            // handles
-            const handle1X = trackX1 + ((2000 - yearMin) / (yearMax - yearMin)) * trackLen;
-            const handle2X = trackX1 + ((2026 - yearMin) / (yearMax - yearMin)) * trackLen;
 
             // active track between handles
             p.stroke(p.color('#2DA3EE'));
@@ -415,14 +444,8 @@
             p.fill(180);
             p.textSize(9);
             p.textAlign(p.CENTER, p.TOP);
-            p.text('2000', handle1X, trackY + 8);
-            p.text('2026', handle2X, trackY + 8);
-
-            // slider label
-            p.fill(220);
-            p.textSize(11);
-            p.textAlign(p.CENTER, p.CENTER);
-            p.text('Range', legX + legW / 2, legY + 58);
+            p.text(sliderStartYear, handle1X, trackY + 12);
+            p.text(sliderEndYear, handle2X, trackY + 12);
 
             //#endregion
 
