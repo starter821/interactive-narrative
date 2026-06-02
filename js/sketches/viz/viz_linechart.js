@@ -57,20 +57,34 @@
             const oy = manager.offsetY || 0;
             const W = manager.width || 600;
             const H = manager.height || 520;
-            const pad = { top: 150, right: 170, bottom: 40, left: 30 };
+            const pad = { top: 150, right: 170, bottom: 80, left: 30 };
             const gW = W - pad.left - pad.right;
             const gH = H - pad.top - pad.bottom;
 
             const getVal = (d) => activeMode === 'pct2000' ? d.pct_from_2000 : d.pct_yoy;
 
+            // filter data by slider year range
+            const filteredSeattle = seattleData.filter(d => {
+                const y = parseInt(d.date.split('-')[0]);
+                return y >= sliderStartYear && y <= sliderEndYear;
+            });
+            const filteredUS = usData.filter(d => {
+                const y = parseInt(d.date.split('-')[0]);
+                return y >= sliderStartYear && y <= sliderEndYear;
+            });
+
             const allVals = [
-                ...seattleData.map(d => getVal(d)),
-                ...usData.map(d => getVal(d))
+                ...filteredSeattle.map(d => getVal(d)),
+                ...filteredUS.map(d => getVal(d))
             ].filter(v => !isNaN(v));
+
+            if (filteredSeattle.length === 0 || filteredUS.length === 0) {
+                return;  // Exit early if no data to display
+            }
 
             const minV = Math.min(...allVals);
             const maxV = Math.max(...allVals);
-            const xMap = i => ox + pad.left + (i / (seattleData.length - 1)) * gW;
+            const xMap = i => ox + pad.left + (i / (filteredSeattle.length - 1)) * gW;
             const yMap = v => oy + pad.top + gH - ((v - minV) / (maxV - minV)) * gH;
 
             // Helper function to apply y-axis offset for pct_yoy mode
@@ -78,30 +92,32 @@
 
 
             //#region buttons
-            const btn1X = ox + pad.left - 30;
-            const btn2X = ox + pad.left + 130;
+            const btn1X = ox + pad.left - 80;
+            const btn2X = ox + pad.left + 70;
             const btnY = oy + pad.top - 150;
             const btnW = 150;
-            const btnH = 30;
+            const btnH = 40;
 
             // button 1 -- cumulative
             p.fill(activeMode === 'pct2000' ? p.color('#2DA3EE') : p.color(50));
             p.stroke(activeMode === 'pct2000' ? p.color('#2DA3EE') : p.color(120));
             p.strokeWeight(1);
-            p.rect(btn1X, btnY, btnW, btnH, 4);
+            p.rect(btn1X, btnY, btnW, btnH, 10, 10, 0, 0);
             p.noStroke();
             p.fill(activeMode === 'pct2000' ? 255 : 160);
+            p.textStyle(activeMode === 'pct2000' ? p.BOLD : p.NORMAL);
             p.textSize(12);
             p.textAlign(p.CENTER, p.CENTER);
-            p.text('Cumulative Price Change', btn1X + btnW / 2, btnY + btnH / 2);
+            p.text('Cumulative Change', btn1X + btnW / 2, btnY + btnH / 2);
 
             // button 2 -- inflation rate
             p.fill(activeMode === 'pct_yoy' ? p.color('#2DA3EE') : p.color(50));
             p.stroke(activeMode === 'pct_yoy' ? p.color('#2DA3EE') : p.color(120));
             p.strokeWeight(1);
-            p.rect(btn2X, btnY, btnW, btnH, 4);
+            p.rect(btn2X, btnY, btnW, btnH, 10, 10, 0, 0);
             p.noStroke();
             p.fill(activeMode === 'pct_yoy' ? 255 : 160);
+            p.textStyle(activeMode === 'pct_yoy' ? p.BOLD : p.NORMAL);
             p.textAlign(p.CENTER, p.CENTER);
             p.text('Inflation Rate', btn2X + btnW / 2, btnY + btnH / 2);
 
@@ -193,7 +209,7 @@
             for (let year = startYear; year <= endYear; year += 5) {
                 // find index of Feb of that year (since data starts Feb 2000)
                 const dateStr = year + '-02';
-                const idx = seattleData.findIndex(d => d.date === dateStr);
+                const idx = filteredSeattle.findIndex(d => d.date === dateStr);
                 if (idx === -1) continue;
                 const x = xMap(idx);
 
@@ -259,8 +275,8 @@
                 }
             }
 
-            drawLine(usData, p.color('orange'), true)
-            drawLine(seattleData, p.color('#2DA3EE'), false)
+            drawLine(filteredUS, p.color('orange'), true)
+            drawLine(filteredSeattle, p.color('#2DA3EE'), false)
 
             // hover dots
             const mx = p.mouseX;
@@ -271,12 +287,12 @@
                 my >= oy + pad.top && my <= oy + pad.top + gH) {
 
                 // find nearest index by x position
-                const idx = Math.round((mx - ox - pad.left) / gW * (seattleData.length - 1));
-                const clampedIdx = Math.max(0, Math.min(idx, seattleData.length - 1));
+                const idx = Math.round((mx - ox - pad.left) / gW * (filteredSeattle.length - 1));
+                const clampedIdx = Math.max(0, Math.min(idx, filteredSeattle.length - 1));
 
-                const seattleV = getVal(seattleData[clampedIdx]);
-                const usV = getVal(usData[clampedIdx]);
-                const date = seattleData[clampedIdx].date;
+                const seattleV = getVal(filteredSeattle[clampedIdx]);
+                const usV = getVal(filteredUS[clampedIdx]);
+                const date = filteredSeattle[clampedIdx].date;
 
                 const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                     'July', 'August', 'September', 'October', 'November', 'December'];
@@ -322,7 +338,7 @@
                 // date label
                 p.noStroke();
                 p.fill(0);
-                p.textSize(12);
+                p.textSize(14);
                 p.textAlign(p.LEFT, p.TOP);
                 p.text(dateLabel, bx + boxPad, by + boxPad);
 
@@ -331,7 +347,7 @@
                 p.noStroke();
                 p.rect(bx + boxPad, by + 28, 14, 14, 2);
                 p.fill(0);
-                p.textSize(11);
+                p.textSize(14);
                 p.textAlign(p.LEFT, p.TOP);
                 p.text('United States', bx + boxPad + 18, by + 28);
                 p.textAlign(p.RIGHT, p.TOP);
@@ -391,7 +407,7 @@
             p.fill(30);
             p.stroke(180);
             p.strokeWeight(1);
-            p.rect(legX, legY, legW, legH, 4);
+            p.rect(legX, legY, legW+10, legH, 4);
 
             // US line sample -- dashed orange
             p.stroke(p.color('orange'));
@@ -407,8 +423,8 @@
             p.noStroke();
             p.fill(220);
             p.textAlign(p.LEFT, p.CENTER);
-            p.textSize(11);
-            p.text('United States', legX + 40, legY + 18);
+            p.textSize(12);
+            p.text('United States', legX + 45, legY + 18);
 
             // Seattle line sample -- solid blue
             p.stroke(p.color('#2DA3EE'));
@@ -416,38 +432,51 @@
             p.line(legX + 10, legY + 35, legX + 35, legY + 35);
             p.noStroke();
             p.fill(220);
-            p.text('Seattle Metro', legX + 40, legY + 35);
+            p.text('Seattle Metro', legX + 45, legY + 35);
 
             // 'Range'
-            p.fill(150);
-            p.textSize(9);
+            p.fill(220);
+            p.textSize(12);
             p.textAlign(p.CENTER, p.CENTER);
-            p.text('Range', legX + legW / 2, legY + 58);
+            p.text('Range', legX + legW / 2 + 6, legY + 58);
 
             // track background
             p.stroke(80);
             p.strokeWeight(3);
-            p.line(trackX1, trackY, trackX2, trackY);
+            p.line(trackX1 + 6, trackY, trackX2 + 6, trackY);
 
             // active track between handles
             p.stroke(p.color('#2DA3EE'));
             p.strokeWeight(3);
-            p.line(handle1X, trackY, handle2X, trackY);
+            p.line(handle1X + 6, trackY, handle2X + 6, trackY);
 
             // handle circles
             p.fill(255);
             p.noStroke();
-            p.circle(handle1X, trackY, 12);
-            p.circle(handle2X, trackY, 12);
+            p.circle(handle1X + 6, trackY, 12);
+            p.circle(handle2X + 6, trackY, 12);
 
             // year labels under handles
-            p.fill(180);
-            p.textSize(9);
+            p.fill(220);
+            p.textSize(11);
             p.textAlign(p.CENTER, p.TOP);
-            p.text(sliderStartYear, handle1X, trackY + 12);
-            p.text(sliderEndYear, handle2X, trackY + 12);
+            p.text(sliderStartYear, handle1X + 6, trackY + 12);
+            p.text(sliderEndYear, handle2X + 6, trackY + 12);
 
             //#endregion
+
+            p.push()
+            p.noStroke();
+            p.fill(220);
+            p.textSize(10);
+            p.textAlign(p.RIGHT, p.BOTTOM);
+            p.text('Source: U.S. Bureau of Labor Statistics', ox + pad.left + gW + 160, oy + pad.top + gH + 70 );
+            p.pop();
+
+            p.noFill()
+            p.stroke(220)
+            p.strokeWeight(0.5);
+            p.rect(ox-50, oy + 40, W + 50, H - 40); // invisible rect to capture mouse events outside the chart area
 
 
         },
