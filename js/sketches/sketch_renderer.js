@@ -9,8 +9,14 @@
             if (window.VizLineChart && window.VizLineChart.preload) {
                 window.VizLineChart.preload(p);
             }
-            if (window.FirstViz && window.FirstViz.preload) {
-                window.FirstVi2.preload(p);
+            if (window.VizHousing && window.VizHousing.preload) {
+                window.VizHousing.preload(p);
+            }
+            if (window.VizPayIndex && window.VizPayIndex.preload) {
+                window.VizPayIndex.preload(p);
+            }
+            if (window.VizRentCap && window.VizRentCap.preload) {
+                window.VizRentCap.preload(p);
             }
         },
 
@@ -40,8 +46,18 @@
                 return;
             }
 
-            if ((ai >= 4 && ai < 6)) {
-                window.VizScatter.draw(p, manager, ai, progress);
+            if (ai === 4) {
+                window.VizHousing.draw(p, manager, ai, progress);
+                return;
+            }
+
+            if (ai === 5) {
+                window.VizPayIndex.draw(p, manager, ai, progress);
+                return;
+            }
+
+            if (ai === 7) {
+                window.VizRentCap.draw(p, manager, ai, progress);
                 return;
             }
 
@@ -51,7 +67,7 @@
             }
 
             if (ai === 3) {
-                window.FirstViz2.draw(p, manager, ai, progress);
+                window.GroceryBasket.draw(p, manager, ai, progress);
                 return;
             }
         }

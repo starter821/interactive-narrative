@@ -1,6 +1,5 @@
 (function () {
-  // State variables persisted outside draw function
-  let fromIdx = 0, toIdx = 0, animT = 1.0, dragging = false, sliderPx = 0;
+  let fromIdx = 0, toIdx = 0, animT = 1.0, sliderPx = 0;
 
   const YEARS = [2006, 2011, 2016, 2021, 2026];
   const ITEMS = ['Bananas', 'Beef', 'Bread', 'Chicken', 'Eggs', 'Milk', 'Oranges', 'Tomatoes'];
@@ -21,42 +20,64 @@
   const SL = { x1: 80, x2: 840, y: 72 };
   const BK = { cx: 210, cy: 558, bw: 344, bh: 302 };
   const RC = { rx: 440, ry: 98, rw: 462, rh: 463 };
+  const FONT = "'Inter', sans-serif";
 
   function xForIdx(i) { return SL.x1 + (SL.x2 - SL.x1) * i / (YEARS.length - 1); }
   function idxForX(x, p) { return Math.round(p.constrain((x - SL.x1) / (SL.x2 - SL.x1) * (YEARS.length - 1), 0, YEARS.length - 1)); }
+
   function interp(p) {
     let out = {}, t = p.constrain(animT, 0, 1);
-    for (let k of ITEMS) { let a = RAW[YEARS[fromIdx]][k], b = RAW[YEARS[toIdx]][k]; out[k] = { price: p.lerp(a.p, b.p, t), qty: p.lerp(a.q, b.q, t) }; }
+    for (let k of ITEMS) {
+      let a = RAW[YEARS[fromIdx]][k], b = RAW[YEARS[toIdx]][k];
+      out[k] = {
+        price: p.lerp(a.p, b.p, t),
+        qty: RAW[YEARS[toIdx]][k].q,  // snap to target year — no interpolation
+      };
+    }
     return out;
   }
 
-  window.FirstViz2 = {
+  window.GroceryBasket = {
     draw: function (p, manager, ai, progress) {
-      // Update animation
       animT = Math.min(1.0, animT + 0.04);
       sliderPx += (xForIdx(toIdx) - sliderPx) * 0.12;
       let cd = interp(p);
-      let yr = Math.round(p.lerp(YEARS[fromIdx], YEARS[toIdx], animT));
+      let yr = YEARS[toIdx];
 
-      // Draw everything
+      // Scale the fixed W×H coordinate space to fit the actual canvas
+      let cw = manager.canvasWidth || W;
+      let ch = manager.canvasHeight || H;
+      let sc = Math.min(cw / W, ch / H);
+      let tx = (cw - W * sc) / 2;
+      let ty = (ch - H * sc) / 2;
+
+      // Transform mouse coordinates into the viz's local space
+      let mx = (p.mouseX - tx) / sc;
+      let my = (p.mouseY - ty) / sc;
+
+      p.push();
+      p.translate(tx, ty);
+      p.scale(sc);
+
       _header(p, yr);
       _slider(p);
       _basket(p, cd);
       _recipe(p, cd, yr);
 
-      // Handle mouse interaction
-      if (p.mouseIsPressed && p.abs(p.mouseY - SL.y) < 24 && p.mouseX >= SL.x1 - 30 && p.mouseX <= SL.x2 + 30) {
-        let ni = idxForX(p.constrain(p.mouseX, SL.x1, SL.x2), p);
+      if (p.mouseIsPressed && p.abs(my - SL.y) < 24 && mx >= SL.x1 - 30 && mx <= SL.x2 + 30) {
+        let ni = idxForX(p.constrain(mx, SL.x1, SL.x2), p);
         if (ni !== toIdx) { fromIdx = toIdx; toIdx = ni; animT = 0; }
       }
+
+      p.pop();
     }
   };
 
   function _header(p, yr) {
     p.noStroke(); p.fill('#3d2b1f'); p.rect(0, 0, W, 50);
-    p.fill('#f5ede0'); p.textFont('Playfair Display'); p.textStyle(p.BOLD);
-    p.textSize(20); p.textAlign(p.LEFT, p.CENTER); p.text('Seattle Grocery Basket', 25, 17);
-    p.fill('#c4a882'); p.textStyle(p.ITALIC); p.textSize(11);
+    p.fill('#f5ede0'); p.textFont(FONT); p.textStyle(p.BOLD);
+    p.textSize(20); p.textAlign(p.LEFT, p.CENTER); p.text('Washington Grocery Basket', 25, 17);
+    p.fill('#c4a882'); p.textStyle(p.NORMAL); p.textSize(11);
     p.text('Inflation impact: what $20 buys in ' + yr, 25, 36);
     p.fill('#e07b39'); p.noStroke(); p.rect(W - 90, 10, 74, 30, 15);
     p.fill('#fff'); p.textStyle(p.BOLD); p.textSize(17);
@@ -74,7 +95,7 @@
       p.line(tx, y - 8, tx, y + 8);
       p.noStroke();
       p.fill(active ? '#c04a3c' : '#7b5c3e');
-      p.textFont('Playfair Display'); p.textStyle(active ? p.BOLD : p.NORMAL);
+      p.textFont(FONT); p.textStyle(active ? p.BOLD : p.NORMAL);
       p.textSize(active ? 13 : 11); p.textAlign(p.CENTER, p.BOTTOM);
       p.text(YEARS[i], tx, y - 11);
     }
@@ -86,9 +107,9 @@
   function _basket(p, cd) {
     let { cx, cy, bw, bh } = BK, btop = cy - bh;
     p.noStroke(); p.fill('#3d2b1f');
-    p.textFont('Playfair Display'); p.textStyle(p.BOLD);
+    p.textFont(FONT); p.textStyle(p.BOLD);
     p.textSize(14); p.textAlign(p.CENTER, p.TOP); p.text('The Basket', cx, 100);
-    p.fill('#7b5c3e'); p.textStyle(p.ITALIC); p.textSize(9);
+    p.fill('#7b5c3e'); p.textStyle(p.NORMAL); p.textSize(9);
     p.text('drag slider to see prices rise', cx, 117);
 
     p.noStroke(); p.fill(0, 0, 0, 16);
@@ -173,7 +194,7 @@
         p.fill(c[0], c[1], c[2], al); p.rect(-s * .73, -s * .78, s * 1.46, s * 1.62, 4);
         p.fill(78, 138, 200, al); p.rect(-s * .73, -s * .08, s * 1.46, s * .74);
         p.fill(228, 238, 250, al); p.triangle(-s * .55, -s * .78, 0, -s * 1.48, s * .55, -s * .78);
-        p.fill(255, 255, 255, al); p.textSize(7); p.textStyle(p.BOLD);
+        p.fill(255, 255, 255, al); p.textFont(FONT); p.textSize(7); p.textStyle(p.BOLD);
         p.textAlign(p.CENTER, p.CENTER); p.text('MILK', 0, s * .3);
         break;
       case 'Oranges':
@@ -195,7 +216,7 @@
 
     p.noStroke();
     if (!gone) {
-      p.fill('#3d2b1f'); p.textFont('Crimson Text'); p.textStyle(p.NORMAL);
+      p.fill('#3d2b1f'); p.textFont(FONT); p.textStyle(p.NORMAL);
       p.textSize(9); p.textAlign(p.CENTER, p.CENTER);
       let qs = qty < 1 ? qty.toFixed(1) : (qty % 1 === 0 ? qty.toFixed(0) : qty.toFixed(1));
       p.text(qs + ' ' + UNITS[name], x, y + s + 12);
@@ -203,7 +224,7 @@
       p.stroke('#c04a3c'); p.strokeWeight(2.5);
       p.line(x - 8, y - 8, x + 8, y + 8); p.line(x + 8, y - 8, x - 8, y + 8);
       p.noStroke(); p.fill('#c04a3c');
-      p.textFont('Crimson Text'); p.textStyle(p.ITALIC);
+      p.textFont(FONT); p.textStyle(p.NORMAL);
       p.textSize(8); p.textAlign(p.CENTER, p.CENTER);
       p.text('too costly', x, y + s + 12);
     }
@@ -217,13 +238,13 @@
     p.noFill(); p.stroke('#c8a472'); p.strokeWeight(.5); p.rect(rx + 7, ry + 7, rw - 14, rh - 14, 6);
 
     p.fill('#4a7c59'); p.noStroke(); p.rect(rx, ry, rw, 52, 8, 8, 0, 0);
-    p.fill('#fff'); p.textFont('Playfair Display'); p.textStyle(p.BOLD);
+    p.fill('#fff'); p.textFont(FONT); p.textStyle(p.BOLD);
     p.textSize(16); p.textAlign(p.LEFT, p.CENTER); p.text('Market Receipt', rx + 16, ry + 18);
-    p.fill('#b8dfc4'); p.textStyle(p.ITALIC); p.textSize(10);
+    p.fill('#b8dfc4'); p.textStyle(p.NORMAL); p.textSize(10);
     p.text('Spending $20 on groceries in Seattle — ' + yr, rx + 16, ry + 37);
 
     let c1 = rx + 17, c2 = rx + 248, c3 = rx + 320, c4 = rx + rw - 15, hY = ry + 68;
-    p.noStroke(); p.fill('#7b5c3e'); p.textFont('Crimson Text'); p.textStyle(p.NORMAL);
+    p.noStroke(); p.fill('#7b5c3e'); p.textFont(FONT); p.textStyle(p.NORMAL);
     p.textSize(9);
     p.textAlign(p.LEFT, p.CENTER); p.text('ITEM', c1 + 12, hY);
     p.textAlign(p.CENTER, p.CENTER); p.text('$/UNIT', c2, hY); p.text('QTY', c3, hY);
@@ -239,7 +260,7 @@
       let cl = IC[it]; p.noStroke(); p.fill(cl[0], cl[1], cl[2], gone ? 68 : 228); p.rect(c1, rowY - 5, 9, 10, 2);
 
       let lbl = it + ' (' + UNITS[it] + ')';
-      p.textFont('Crimson Text'); p.textStyle(p.NORMAL); p.textSize(12.5);
+      p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(12.5);
       p.textAlign(p.LEFT, p.CENTER);
       if (gone) {
         p.fill('#b09878'); p.text(lbl, c1 + 14, rowY);
@@ -266,7 +287,7 @@
     p.strokeWeight(.5); p.line(rx + 12, tY + 4, rx + rw - 12, tY + 4);
 
     p.noStroke(); p.fill('#3d2b1f');
-    p.textFont('Playfair Display'); p.textStyle(p.BOLD);
+    p.textFont(FONT); p.textStyle(p.BOLD);
     p.textSize(14); p.textAlign(p.LEFT, p.CENTER); p.text('TOTAL', c1, tY + 22);
     p.textSize(16); p.textAlign(p.RIGHT, p.CENTER);
     p.fill(total > 20.4 ? '#c04a3c' : '#4a7c59'); p.text('$' + total.toFixed(2), c4, tY + 22);
@@ -274,13 +295,13 @@
     let bY = tY + 38, bW = rw - 24;
     p.noStroke(); p.fill('#ddd0bc'); p.rect(rx + 12, bY, bW, 12, 6);
     p.fill(total > 20.4 ? '#c04a3c' : '#4a7c59'); p.rect(rx + 12, bY, bW * Math.min(1, total / 20), 12, 6);
-    p.fill('#7b5c3e'); p.textFont('Crimson Text'); p.textStyle(p.ITALIC);
+    p.fill('#7b5c3e'); p.textFont(FONT); p.textStyle(p.NORMAL);
     p.textSize(8.5); p.textAlign(p.RIGHT, p.BOTTOM); p.text('$20.00 budget', rx + rw - 12, bY);
 
     let dropped = ITEMS.filter(it => cd[it].qty < .05);
     if (dropped.length > 0) {
       p.noStroke(); p.fill('#c04a3c');
-      p.textFont('Crimson Text'); p.textStyle(p.ITALIC); p.textSize(9);
+      p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(9);
       p.textAlign(p.LEFT, p.TOP);
       p.text('Can no longer afford: ' + dropped.join(', '), rx + 12, tY + 54);
     }
@@ -290,7 +311,7 @@
       let now = ITEMS.reduce((s, it) => s + cd[it].price * RAW[2006][it].q, 0);
       let pct = ((now - base) / base * 100).toFixed(0);
       p.noStroke(); p.fill('#a07040');
-      p.textFont('Crimson Text'); p.textStyle(p.NORMAL); p.textSize(9);
+      p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(9);
       p.textAlign(p.RIGHT, p.BOTTOM);
       p.text('Prices +' + pct + '% vs 2006 for same items', rx + rw - 12, ry + rh - 3);
     }
