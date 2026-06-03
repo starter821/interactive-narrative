@@ -12,6 +12,10 @@
             if (window.FirstViz && window.FirstViz.preload) {
                 window.FirstVi2.preload(p);
             }
+
+            if (window.VizCategories && window.VizCategories.preload) {
+                window.VizCategories.preload(p);
+            }
         },
 
         setData: function (manager) {
@@ -38,6 +42,11 @@
                     window.VizLineChart.resetAnimation) {
                     window.VizLineChart.resetAnimation();
                 }
+            }
+
+            if (ai == 2) {
+                window.VizCategories.draw(p, manager, ai, progress);
+                return;
             }
 
             if (ai === 6 || ai === 9) {

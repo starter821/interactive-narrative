@@ -11,8 +11,6 @@
     let sliderStartYear = 2000;
     let sliderEndYear = 2026;
     let draggingHandle = null;
-    let lineAnimStart = null;
-    let lineAnimProgress = 0;
     let animStartTime = null;
     let animProgress = 0;
     let wasActive = false;
