@@ -81,7 +81,7 @@
             const oy = manager.offsetY || 0;
             const W = manager.width || 600;
             const H = manager.height || 520;
-            const pad = { top: 150, right: 170, bottom: 80, left: 30 };
+            const pad = { top: 150, right: 170, bottom: 120, left: 30 };
             const gW = W - pad.left - pad.right;
             const gH = H - pad.top - pad.bottom;
 
@@ -179,22 +179,25 @@
             p.textSize(11);
             p.textAlign(p.RIGHT, p.CENTER);
             // round to nice intervals
-            let tickMin, tickMax, interval;
-            if (activeMode === 'pct2000') {
-                tickMin = 0;
-                tickMax = 120;
-                interval = 20;
-            } else {
-                tickMin = -2;
-                tickMax = 10;
-                interval = 2;
-            }
 
-            const rawRange = tickMax - tickMin;
+            const rawMin = Math.min(...allVals);
+            const rawMax = Math.max(...allVals);
+
+            let interval;
+            const rawRange = rawMax - rawMin;
             interval = rawRange > 50 ? 20 : rawRange > 20 ? 5 : 2;
 
+            const tickMin = Math.floor(rawMin / interval) * interval;
+            const tickMax = Math.ceil(rawMax / interval) * interval;
+
             for (let v = tickMin; v <= tickMax; v += interval) {
-                let y = getDisplayY(yMap(v));
+                let y = getDisplayY(yMap(v))
+
+                // Clamp y to plot boundaries
+                const plotTop = oy + pad.top;
+                const plotBottom = oy + pad.top + gH;
+                y = p.constrain(y, plotTop, plotBottom);
+
                 // tick
                 p.stroke(220);
                 p.strokeWeight(1);
@@ -292,9 +295,9 @@
                         if (isNaN(v1) || isNaN(v2)) continue;
 
                         const x1 = xMap(i - 1);
-                        const y1 = getDisplayY(yMap(v1));
+                        const y1 = yMap(v1);
                         const x2 = xMap(i);
-                        const y2 = getDisplayY(yMap(v2));
+                        const y2 = yMap(v2);
 
                         const dx = x2 - x1;
                         const dy = y2 - y1;
@@ -336,7 +339,7 @@
                         if (!isNaN(v)) {
                             p.vertex(
                                 xMap(i),
-                                getDisplayY(yMap(v))
+                                yMap(v)
                             );
                         }
                     }
@@ -359,8 +362,8 @@
                         );
 
                         const y = p.lerp(
-                            getDisplayY(yMap(v1)),
-                            getDisplayY(yMap(v2)),
+                            yMap(v1),
+                            yMap(v2),
                             partial
                         );
 
@@ -398,20 +401,20 @@
                 // vertical line
                 p.stroke(150);
                 p.strokeWeight(1);
-                p.line(xMap(clampedIdx), getDisplayY(oy + pad.top - 24), xMap(clampedIdx), getDisplayY(oy + pad.top + gH));
+                p.line(xMap(clampedIdx), oy + pad.top, xMap(clampedIdx), oy + pad.top + gH);
 
                 // dot on seattle line
                 if (!isNaN(seattleV)) {
                     p.fill(p.color('#2DA3EE'));
                     p.noStroke();
-                    p.circle(xMap(clampedIdx), getDisplayY(yMap(seattleV)), 10);
+                    p.circle(xMap(clampedIdx), yMap(seattleV), 10);
                 }
 
                 // dot on us line
                 if (!isNaN(usV)) {
                     p.fill(p.color('orange'));
                     p.noStroke();
-                    p.circle(xMap(clampedIdx), getDisplayY(yMap(usV)), 10);
+                    p.circle(xMap(clampedIdx), yMap(usV), 10);
                 }
 
                 // annotation box
@@ -466,11 +469,11 @@
             const legX = ox + pad.left + gW + 10;
             const legY = oy + pad.top + 10;
             const legW = 145;
-            const legH = 110;
+            const legH = 55;
             const sliderPad = 12;
-            const trackY = legY + 75;
-            const trackX1 = legX + sliderPad;
-            const trackX2 = legX + legW - sliderPad;
+            const trackY = oy + pad.top + gH + 55;
+            const trackX1 = ox + pad.left;
+            const trackX2 = ox + pad.left + gW;
             const trackLen = trackX2 - trackX1;
             const yearMin = 2000;
             const yearMax = 2026;
@@ -535,8 +538,8 @@
             // 'Range'
             p.fill(220);
             p.textSize(12);
-            p.textAlign(p.CENTER, p.CENTER);
-            p.text('Range', legX + legW / 2 + 6, legY + 58);
+            p.textAlign(p.LEFT, p.CENTER);
+            p.text('Range', trackX1 - 50, trackY);
 
             // track background
             p.stroke(80);
@@ -563,70 +566,71 @@
 
             //#endregion
 
-            p.push()
-            p.noStroke();
-            p.fill(220);
-            p.textSize(10);
-            p.textAlign(p.RIGHT, p.BOTTOM);
-            p.text('Source: U.S. Bureau of Labor Statistics', ox + pad.left + gW + 160, oy + pad.top + gH + 70);
-            p.pop();
+            // p.push()
+            // p.noStroke();
+            // p.fill(220);
+            // p.textSize(10);
+            // p.textAlign(p.RIGHT, p.BOTTOM);
+            // p.text('Source: U.S. Bureau of Labor Statistics', ox + pad.left + gW + 160, oy + pad.top + gH + 70);
+            // p.pop();
 
-            p.noFill()
-            p.stroke(220)
-            p.strokeWeight(0.5);
-            p.rect(ox - 50, oy + 40, W + 50, H - 40);
+            // const events = [
+            //     { date: '2008-09', label: 'Global Financial Crisis' },
+            //     { date: '2020-03', label: 'COVID Emergency' },
+            //     { date: '2021-05', label: 'US Reopens' }
+            // ];
 
-            const events = [
-                { date: '2008-09', label: 'Global Financial Crisis' },
-                { date: '2020-03', label: 'COVID Emergency' },
-                { date: '2021-05', label: 'US Reopens' }
-            ];
+            // events.forEach(event => {
 
-            events.forEach(event => {
+            //     let x = null;
+            //     let y = null;
 
-                let x = null;
-                let y = null;
+            //     for (let i = 0; i < filteredSeattle.length - 1; i++) {
 
-                for (let i = 0; i < filteredSeattle.length - 1; i++) {
+            //         const leftDate = filteredSeattle[i].date;
+            //         const rightDate = filteredSeattle[i + 1].date;
 
-                    const leftDate = filteredSeattle[i].date;
-                    const rightDate = filteredSeattle[i + 1].date;
+            //         if (event.date >= leftDate && event.date <= rightDate) {
 
-                    if (event.date >= leftDate && event.date <= rightDate) {
+            //             const eventTime = new Date(event.date + '-01').getTime();
+            //             const leftTime = new Date(leftDate + '-01').getTime();
+            //             const rightTime = new Date(rightDate + '-01').getTime();
 
-                        const eventTime = new Date(event.date + '-01').getTime();
-                        const leftTime = new Date(leftDate + '-01').getTime();
-                        const rightTime = new Date(rightDate + '-01').getTime();
+            //             const t = (eventTime - leftTime) / (rightTime - leftTime);
 
-                        const t = (eventTime - leftTime) / (rightTime - leftTime);
+            //             x = p.lerp(xMap(i), xMap(i + 1), t);
 
-                        x = p.lerp(xMap(i), xMap(i + 1), t);
+            //             const v1 = getVal(filteredSeattle[i]);
+            //             const v2 = getVal(filteredSeattle[i + 1]);
 
-                        const v1 = getVal(filteredSeattle[i]);
-                        const v2 = getVal(filteredSeattle[i + 1]);
+            //             y = p.lerp(
+            //                 yMap(v1),
+            //                 yMap(v2),
+            //                 t
+            //             );
 
-                        y = p.lerp(
-                            getDisplayY(yMap(v1)),
-                            getDisplayY(yMap(v2)),
-                            t
-                        );
+            //             break;
+            //         }
+            //     }
 
-                        break;
-                    }
-                }
+            //     if (x === null || y === null) return;
 
-                if (x === null || y === null) return;
+            //     p.noStroke();
+            //     p.fill('#ff5555');
+            //     p.circle(x, y, 8);
 
-                p.noStroke();
-                p.fill('#ff5555');
-                p.circle(x, y, 8);
-
-                p.textSize(10);
-                p.textAlign(p.CENTER, p.BOTTOM);
-                p.text(event.label, x, y - 12);
+            //     p.textSize(10);
+            //     p.textAlign(p.CENTER, p.BOTTOM);
+            //     p.text(event.label, x, y - 12);
 
 
-            });
+            // });
+
+            p.noFill();
+            p.stroke(220);
+            p.strokeWeight(1);
+         
+            p.rect(ox - 50, oy + 40, W + 50, H - 40, 0, 15, 15, 15);
 
 
 
