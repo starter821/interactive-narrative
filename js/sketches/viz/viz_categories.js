@@ -6,6 +6,8 @@
     let isDragging = false;
     let autoPlaying = false;
     let autoPlayStart = null;
+    let lastPressed = false;
+    let wasOnScene = false;
 
     const categories = [
         { key: 'housing', label: 'Housing 🏠', file: 'data/housing.tsv', color: '#ffffff', data: [] },
@@ -57,14 +59,22 @@
             if (!isInitialized) return;
             if (categories.some(c => c.data.length === 0)) return;
 
-            if (progress > 0 && !isDragging) {
-                if (!autoPlaying) {
+            if (progress > 0) {
+                if (!wasOnScene) {
+                    // just entered scene, restart
+                    wasOnScene = true;
                     autoPlaying = true;
                     autoPlayStart = p.millis();
-                    sliderYear = 2000;
+                    sliderDate = 2000;
                 }
-                const elapsed = (p.millis() - autoPlayStart) / 1000; // seconds
-                const duration = 6; // seconds to go 2000 -> 2025
+            } else {
+                wasOnScene = false;
+            }
+
+            if (autoPlaying && !isDragging) {
+                if (!autoPlayStart) autoPlayStart = p.millis();
+                const elapsed = (p.millis() - autoPlayStart) / 1000;
+                const duration = 6;
                 const t = Math.min(elapsed / duration, 1);
                 sliderDate = 2000 + t * 26;
             }
@@ -83,6 +93,14 @@
             const pctRange = pctMax - pctMin;
             const zeroX = ox + pad.left + ((-pctMin) / pctRange) * gW;
 
+            const displayYear = Math.floor(sliderDate);
+            const displayMonth = Math.min(Math.floor((sliderDate % 1) * 12), 11);
+
+            
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            console.log('sliderDate:', sliderDate, 'displayYear:', displayYear, 'displayMonth:', displayMonth);
+
             // title
             p.noStroke();
             p.fill(255);
@@ -90,6 +108,56 @@
             p.textStyle(p.NORMAL);
             p.textAlign(p.CENTER, p.TOP);
             p.text('Cumulative CPI Change by Category, 2000 - 2025', ox + pad.left + gW / 2, oy + 20);
+
+            // date label
+            p.noStroke();
+            p.fill(255);
+            p.textSize(14);
+            p.textAlign(p.CENTER, p.TOP);
+            p.text(monthNames[displayMonth] + ' ' + displayYear, ox + pad.left + gW / 2, oy + 55);
+
+            const btnY = oy + 50;
+            const btnW = 60;
+            const btnH = 24;
+            const pauseBtnX = ox + pad.left + gW / 2 + 60;
+            const resetBtnX = ox + pad.left + gW / 2 + 130;
+
+            // pause/play
+            p.fill(autoPlaying ? 80 : 40);
+            p.stroke(160);
+            p.strokeWeight(1);
+            p.rect(pauseBtnX, btnY, btnW, btnH, 4);
+            p.noStroke();
+            p.fill(220);
+            p.textSize(11);
+            p.textAlign(p.CENTER, p.CENTER);
+            p.text(autoPlaying ? 'Pause' : 'Play', pauseBtnX + btnW / 2, btnY + btnH / 2);
+
+            // reset
+            p.fill(40);
+            p.stroke(160);
+            p.strokeWeight(1);
+            p.rect(resetBtnX, btnY, btnW, btnH, 4);
+            p.noStroke();
+            p.fill(220);
+            p.text('Reset', resetBtnX + btnW / 2, btnY + btnH / 2);
+
+            // button clicks
+            const pressed = p.mouseIsPressed;
+            if (pressed && !lastPressed) {
+                const mx = p.mouseX;
+                const my = p.mouseY;
+                if (mx >= pauseBtnX && mx <= pauseBtnX + btnW && my >= btnY && my <= btnY + btnH) {
+                    autoPlaying = !autoPlaying;
+                    if (autoPlaying) autoPlayStart = p.millis() - ((sliderDate - 2000) / 26) * 6000;
+                }
+                if (mx >= resetBtnX && mx <= resetBtnX + btnW && my >= btnY && my <= btnY + btnH) {
+                    sliderDate = 2000;
+                    autoPlaying = true;
+                    autoPlayStart = p.millis();
+                }
+            }
+            lastPressed = pressed;
 
             // zero line
             p.stroke(120);
@@ -154,6 +222,7 @@
                 if (!isDragging) {
                     if (Math.abs(p.mouseX - handleX) < 12 && Math.abs(p.mouseY - trackY) < 12) {
                         isDragging = true;
+                        autoPlaying = false;
                     }
                 }
                 if (isDragging) {
@@ -180,10 +249,7 @@
             p.noStroke();
             p.textSize(11);
             p.textAlign(p.CENTER, p.TOP);
-            const displayYear = Math.floor(sliderDate);
-            const displayMonth = Math.round((sliderDate % 1) * 12) + 1;
-            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            p.text(monthNames[displayMonth - 1] + ' ' + displayYear, handleX, trackY + 10);
+            p.text(monthNames[displayMonth] + ' ' + displayYear, handleX, trackY + 10);
 
             // bars
             categories.forEach((cat, i) => {
@@ -193,8 +259,8 @@
                 const barH = rowH - rowPad * 2;
 
                 const displayYear = Math.floor(sliderDate);
-                const displayMonth = Math.round((sliderDate % 1) * 12) + 1;
-                const mm = String(displayMonth).padStart(2, '0');
+                const displayMonth = Math.min(Math.floor((sliderDate % 1) * 12), 11);
+                const mm = String(displayMonth + 1).padStart(2, '0');
                 const target = displayYear + '-' + mm;
 
                 let closest = cat.data[0];
