@@ -11,8 +11,19 @@
     let sliderStartYear = 2000;
     let sliderEndYear = 2026;
     let draggingHandle = null;
+    let lineAnimStart = null;
+    let lineAnimProgress = 0;
+    let animStartTime = null;
+    let animProgress = 0;
+    let wasActive = false;
 
     window.VizLineChart = {
+
+        resetAnimation: function () {
+            wasActive = false;
+            animStartTime = null;
+            animProgress = 0;
+        },
         preload: function (p) {
             seattleTable = p.loadTable('data/all_items_cpi_rebased.tsv', 'tsv', 'header');
             usTable = p.loadTable('data/us_cpi_rebased.tsv', 'tsv', 'header');
@@ -45,7 +56,20 @@
         },
 
         draw: function (p, manager, ai, progress) {
-            // Ensure setup runs on first draw
+
+            if (!wasActive) {
+                animStartTime = p.millis();
+                wasActive = true;
+            }
+
+            animProgress = p.constrain(
+                (p.millis() - animStartTime) / 4000,
+                0,
+                1
+            );
+
+            // optional easing
+            animProgress = 1 - Math.pow(1 - animProgress, 3);
             if (!isInitialized) {
                 this.setup();
             }
@@ -105,8 +129,8 @@
             p.rect(btn1X, btnY, btnW, btnH, 10, 10, 0, 0);
             p.noStroke();
             p.fill(activeMode === 'pct2000' ? 255 : 160);
-            p.textStyle(activeMode === 'pct2000' ? p.BOLD : p.NORMAL);
-            p.textSize(12);
+            p.textStyle(p.BOLD)
+            p.textSize(14);
             p.textAlign(p.CENTER, p.CENTER);
             p.text('Cumulative Change', btn1X + btnW / 2, btnY + btnH / 2);
 
@@ -117,7 +141,6 @@
             p.rect(btn2X, btnY, btnW, btnH, 10, 10, 0, 0);
             p.noStroke();
             p.fill(activeMode === 'pct_yoy' ? 255 : 160);
-            p.textStyle(activeMode === 'pct_yoy' ? p.BOLD : p.NORMAL);
             p.textAlign(p.CENTER, p.CENTER);
             p.text('Inflation Rate', btn2X + btnW / 2, btnY + btnH / 2);
 
@@ -149,7 +172,8 @@
             p.textSize(20);
             p.textStyle(p.NORMAL);
             p.textAlign(p.CENTER, p.TOP);
-            p.text(title, ox + pad.left + gW / 2, oy + 60);
+            // p.text(title, ox + pad.left + gW / 2 + 30, oy + 60);
+            p.text(title, ox - 50 + (W + 50) / 2, oy + 60); // center title over the entire area including the legend
 
             // y axis
             p.textSize(11);
@@ -206,7 +230,7 @@
             p.textAlign(p.CENTER, p.TOP);
             p.textSize(11);
 
-            for (let year = startYear; year <= endYear; year += 5) {
+            for (let year = startYear; year <= endYear; year += 2) {
                 // find index of Feb of that year (since data starts Feb 2000)
                 const dateStr = year + '-02';
                 const idx = filteredSeattle.findIndex(d => d.date === dateStr);
@@ -236,41 +260,113 @@
             //#endregion
 
             function drawLine(data, col, dashed) {
+
+                // start animation when entering this scene
+                if (!wasActive) {
+                    animStartTime = p.millis();
+                    wasActive = true;
+                }
+
+                // animate over 2 seconds
+                animProgress = p.constrain(
+                    (p.millis() - animStartTime) / 2000,
+                    0,
+                    1
+                );
+
+                const revealIndex = animProgress * (data.length - 1);
+
                 p.stroke(col);
                 p.strokeWeight(2);
                 p.noFill();
+
                 if (dashed) {
-                    const dashLen = 3;
-                    const gapLen = 4.5;
-                    for (let i = 1; i < data.length; i++) {
+
+                    const maxSeg = Math.floor(revealIndex);
+
+                    for (let i = 1; i <= maxSeg; i++) {
+
                         const v1 = getVal(data[i - 1]);
                         const v2 = getVal(data[i]);
+
                         if (isNaN(v1) || isNaN(v2)) continue;
-                        const x1 = xMap(i - 1), y1 = getDisplayY(yMap(v1));
-                        const x2 = xMap(i), y2 = getDisplayY(yMap(v2));
-                        const dx = x2 - x1, dy = y2 - y1;
+
+                        const x1 = xMap(i - 1);
+                        const y1 = getDisplayY(yMap(v1));
+                        const x2 = xMap(i);
+                        const y2 = getDisplayY(yMap(v2));
+
+                        const dx = x2 - x1;
+                        const dy = y2 - y1;
+
                         const segLen = Math.sqrt(dx * dx + dy * dy);
+
                         let t = 0;
                         let drawing = true;
+
                         while (t < segLen) {
-                            const t2 = Math.min(t + (drawing ? dashLen : gapLen), segLen);
+
+                            const t2 = Math.min(
+                                t + (drawing ? 3 : 4.5),
+                                segLen
+                            );
+
                             if (drawing) {
                                 p.line(
-                                    x1 + dx * (t / segLen), y1 + dy * (t / segLen),
-                                    x1 + dx * (t2 / segLen), y1 + dy * (t2 / segLen)
+                                    x1 + dx * (t / segLen),
+                                    y1 + dy * (t / segLen),
+                                    x1 + dx * (t2 / segLen),
+                                    y1 + dy * (t2 / segLen)
                                 );
                             }
+
                             t = t2;
                             drawing = !drawing;
                         }
-
                     }
+
                 } else {
+
                     p.beginShape();
-                    data.forEach((d, i) => {
-                        const v = activeMode === 'pct2000' ? d.pct_from_2000 : d.pct_yoy;
-                        if (!isNaN(v)) p.vertex(xMap(i), getDisplayY(yMap(v)));
-                    });
+
+                    for (let i = 0; i <= Math.floor(revealIndex); i++) {
+
+                        const v = getVal(data[i]);
+
+                        if (!isNaN(v)) {
+                            p.vertex(
+                                xMap(i),
+                                getDisplayY(yMap(v))
+                            );
+                        }
+                    }
+
+                    const partial = revealIndex - Math.floor(revealIndex);
+
+                    if (
+                        Math.floor(revealIndex) < data.length - 1
+                    ) {
+
+                        const i = Math.floor(revealIndex);
+
+                        const v1 = getVal(data[i]);
+                        const v2 = getVal(data[i + 1]);
+
+                        const x = p.lerp(
+                            xMap(i),
+                            xMap(i + 1),
+                            partial
+                        );
+
+                        const y = p.lerp(
+                            getDisplayY(yMap(v1)),
+                            getDisplayY(yMap(v2)),
+                            partial
+                        );
+
+                        p.vertex(x, y);
+                    }
+
                     p.endShape();
                 }
             }
@@ -339,6 +435,7 @@
                 p.noStroke();
                 p.fill(0);
                 p.textSize(14);
+                p.textStyle(p.BOLD);
                 p.textAlign(p.LEFT, p.TOP);
                 p.text(dateLabel, bx + boxPad, by + boxPad);
 
@@ -347,7 +444,8 @@
                 p.noStroke();
                 p.rect(bx + boxPad, by + 28, 14, 14, 2);
                 p.fill(0);
-                p.textSize(14);
+                p.textSize(13);
+                p.textStyle(p.NORMAL);
                 p.textAlign(p.LEFT, p.TOP);
                 p.text('United States', bx + boxPad + 18, by + 28);
                 p.textAlign(p.RIGHT, p.TOP);
@@ -407,7 +505,7 @@
             p.fill(30);
             p.stroke(180);
             p.strokeWeight(1);
-            p.rect(legX, legY, legW+10, legH, 4);
+            p.rect(legX, legY, legW + 10, legH, 4);
 
             // US line sample -- dashed orange
             p.stroke(p.color('orange'));
@@ -470,13 +568,69 @@
             p.fill(220);
             p.textSize(10);
             p.textAlign(p.RIGHT, p.BOTTOM);
-            p.text('Source: U.S. Bureau of Labor Statistics', ox + pad.left + gW + 160, oy + pad.top + gH + 70 );
+            p.text('Source: U.S. Bureau of Labor Statistics', ox + pad.left + gW + 160, oy + pad.top + gH + 70);
             p.pop();
 
             p.noFill()
             p.stroke(220)
             p.strokeWeight(0.5);
-            p.rect(ox-50, oy + 40, W + 50, H - 40); // invisible rect to capture mouse events outside the chart area
+            p.rect(ox - 50, oy + 40, W + 50, H - 40);
+
+            const events = [
+                { date: '2008-09', label: 'Global Financial Crisis' },
+                { date: '2020-03', label: 'COVID Emergency' },
+                { date: '2021-05', label: 'US Reopens' }
+            ];
+
+            events.forEach(event => {
+
+                let x = null;
+                let y = null;
+
+                for (let i = 0; i < filteredSeattle.length - 1; i++) {
+
+                    const leftDate = filteredSeattle[i].date;
+                    const rightDate = filteredSeattle[i + 1].date;
+
+                    if (event.date >= leftDate && event.date <= rightDate) {
+
+                        const eventTime = new Date(event.date + '-01').getTime();
+                        const leftTime = new Date(leftDate + '-01').getTime();
+                        const rightTime = new Date(rightDate + '-01').getTime();
+
+                        const t = (eventTime - leftTime) / (rightTime - leftTime);
+
+                        x = p.lerp(xMap(i), xMap(i + 1), t);
+
+                        const v1 = getVal(filteredSeattle[i]);
+                        const v2 = getVal(filteredSeattle[i + 1]);
+
+                        y = p.lerp(
+                            getDisplayY(yMap(v1)),
+                            getDisplayY(yMap(v2)),
+                            t
+                        );
+
+                        break;
+                    }
+                }
+
+                if (x === null || y === null) return;
+
+                p.noStroke();
+                p.fill('#ff5555');
+                p.circle(x, y, 8);
+
+                p.textSize(10);
+                p.textAlign(p.CENTER, p.BOTTOM);
+                p.text(event.label, x, y - 12);
+
+
+            });
+
+
+
+
 
 
         },

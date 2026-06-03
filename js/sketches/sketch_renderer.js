@@ -33,6 +33,11 @@
             if (ai === 1) {
                 window.VizLineChart.draw(p, manager, ai, progress);
                 return;
+            } else {
+                if (window.VizLineChart &&
+                    window.VizLineChart.resetAnimation) {
+                    window.VizLineChart.resetAnimation();
+                }
             }
 
             if (ai === 6 || ai === 9) {
