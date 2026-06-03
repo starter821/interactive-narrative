@@ -55,13 +55,13 @@
             const oy = manager.offsetY || 0;
             const W = manager.width || 600;
             const H = manager.height || 520;
-            const pad = { top: 80, right: 60, bottom: 80, left: 100 };
+            const pad = { top: 80, right: 60, bottom: 120, left: 100 };
             const gW = W - pad.left - pad.right;
             const gH = H - pad.top - pad.bottom;
             const rowH = gH / categories.length;
 
             const pctMin = -10;
-            const pctMax = 250;
+            const pctMax = 260;
             const pctRange = pctMax - pctMin;
             const zeroX = ox + pad.left + ((-pctMin) / pctRange) * gW;
 
@@ -75,7 +75,7 @@
 
             // zero line
             p.stroke(120);
-            p.strokeWeight(1);
+            p.strokeWeight(2);
             p.line(zeroX, oy + pad.top, zeroX, oy + pad.top + gH);
 
             // x axis ticks and grid lines
@@ -88,7 +88,7 @@
                 p.line(x, oy + pad.top + gH, x, oy + pad.top + gH + 5);
                 p.noStroke();
                 p.fill(200);
-                p.textSize(9);
+                p.textSize(12);
                 p.textAlign(p.CENTER, p.TOP);
                 p.text(v + '%', x, oy + pad.top + gH + 8);
             }
@@ -96,9 +96,9 @@
             // x axis label
             p.noStroke();
             p.fill(200);
-            p.textSize(12);
+            p.textSize(14);
             p.textAlign(p.CENTER, p.TOP);
-            p.text('Cumulative % change since 2000', ox + pad.left + gW / 2, oy + pad.top + gH + 28);
+            p.text('Cumulative % change since 2000', ox + pad.left + gW / 2, oy + pad.top + gH + 40);
 
             // x axis bottom line
             p.stroke(180);
@@ -127,9 +127,9 @@
             const trackX1 = ox + pad.left;
             const trackX2 = ox + pad.left + gW;
             const trackLen = trackX2 - trackX1;
-            const trackY = oy + pad.top + gH + 55;
+            const trackY = oy + pad.top + gH + 80;
             const yearMin = 2000;
-            const yearMax = 2025;
+            const yearMax = 2026;
             const handleX = trackX1 + ((sliderYear - yearMin) / (yearMax - yearMin)) * trackLen;
 
             if (p.mouseIsPressed) {
