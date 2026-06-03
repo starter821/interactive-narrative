@@ -2,21 +2,27 @@
 (function () {
 
     let isInitialized = false;
-    let sliderYear = 2025;
+    let sliderDate = 2000.0;
     let isDragging = false;
+    let autoPlaying = false;
+    let autoPlayStart = null;
 
     const categories = [
-        { key: 'housing', label: 'Housing', file: 'data/housing.tsv', color: '#ffffff', data: [] },
-        { key: 'apparel', label: 'Apparel', file: 'data/apparel.tsv', color: '#ffffff', data: [] },
-        { key: 'food', label: 'Food', file: 'data/food.tsv', color: '#ffffff', data: [] },
-        { key: 'medical', label: 'Medical', file: 'data/medical_care.tsv', color: '#ffffff', data: [] },
-        { key: 'gas', label: 'Gas', file: 'data/seattle_gasoline_cpi.tsv', color: '#ffffff', data: [] },
-        { key: 'transport', label: 'Transport', file: 'data/transportation.tsv', color: '#ffffff', data: [] },
+        { key: 'housing', label: 'Housing 🏠', file: 'data/housing.tsv', color: '#ffffff', data: [] },
+        { key: 'apparel', label: 'Apparel 👕', file: 'data/apparel.tsv', color: '#ffffff', data: [] },
+        { key: 'food', label: 'Food 🍽️', file: 'data/food.tsv', color: '#ffffff', data: [] },
+        { key: 'medical', label: 'Medical 🏥', file: 'data/medical_care.tsv', color: '#ffffff', data: [] },
+        { key: 'gas', label: 'Gas ⛽', file: 'data/seattle_gasoline_cpi.tsv', color: '#ffffff', data: [] },
+        { key: 'transport', label: 'Transport 🚌', file: 'data/transportation.tsv', color: '#ffffff', data: [] },
     ];
 
     window.VizCategories = {
 
-        resetAnimation: function () {},
+        resetAnimation: function () {
+            autoPlaying = false;
+            autoPlayStart = null;
+            sliderYear = 2000;
+        },
 
         preload: function (p) {
             categories[0].tableRef = p.loadTable(categories[0].file, 'tsv', 'header');
@@ -51,17 +57,29 @@
             if (!isInitialized) return;
             if (categories.some(c => c.data.length === 0)) return;
 
+            if (progress > 0 && !isDragging) {
+                if (!autoPlaying) {
+                    autoPlaying = true;
+                    autoPlayStart = p.millis();
+                    sliderYear = 2000;
+                }
+                const elapsed = (p.millis() - autoPlayStart) / 1000; // seconds
+                const duration = 6; // seconds to go 2000 -> 2025
+                const t = Math.min(elapsed / duration, 1);
+                sliderDate = 2000 + t * 26;
+            }
+
             const ox = manager.offsetX || 0;
             const oy = manager.offsetY || 0;
             const W = manager.width || 600;
             const H = manager.height || 520;
-            const pad = { top: 80, right: 60, bottom: 120, left: 100 };
+            const pad = { top: 140, right: 60, bottom: 80, left: 100 };
             const gW = W - pad.left - pad.right;
             const gH = H - pad.top - pad.bottom;
             const rowH = gH / categories.length;
 
             const pctMin = -10;
-            const pctMax = 260;
+            const pctMax = 340;
             const pctRange = pctMax - pctMin;
             const zeroX = ox + pad.left + ((-pctMin) / pctRange) * gW;
 
@@ -113,7 +131,7 @@
                 p.line(ox + pad.left, rowY, ox + pad.left + gW, rowY);
                 p.noStroke();
                 p.fill(220);
-                p.textSize(13);
+                p.textSize(16);
                 p.textAlign(p.RIGHT, p.CENTER);
                 p.text(cat.label, ox + pad.left - 10, rowY + rowH / 2);
             });
@@ -127,10 +145,10 @@
             const trackX1 = ox + pad.left;
             const trackX2 = ox + pad.left + gW;
             const trackLen = trackX2 - trackX1;
-            const trackY = oy + pad.top + gH + 80;
+            const trackY = oy + pad.top - 40;
             const yearMin = 2000;
             const yearMax = 2026;
-            const handleX = trackX1 + ((sliderYear - yearMin) / (yearMax - yearMin)) * trackLen;
+            const handleX = trackX1 + ((sliderDate - yearMin) / (yearMax - yearMin)) * trackLen;
 
             if (p.mouseIsPressed) {
                 if (!isDragging) {
@@ -139,8 +157,8 @@
                     }
                 }
                 if (isDragging) {
-                    const raw = yearMin + ((p.mouseX - trackX1) / trackLen) * (yearMax - yearMin);
-                    sliderYear = Math.round(Math.min(Math.max(raw, yearMin), yearMax));
+                    sliderDate = yearMin + ((p.mouseX - trackX1) / trackLen) * (yearMax - yearMin);
+                    sliderDate = Math.min(Math.max(sliderDate, yearMin), yearMax);
                 }
             } else {
                 isDragging = false;
@@ -162,7 +180,10 @@
             p.noStroke();
             p.textSize(11);
             p.textAlign(p.CENTER, p.TOP);
-            p.text(sliderYear, handleX, trackY + 10);
+            const displayYear = Math.floor(sliderDate);
+            const displayMonth = Math.round((sliderDate % 1) * 12) + 1;
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            p.text(monthNames[displayMonth - 1] + ' ' + displayYear, handleX, trackY + 10);
 
             // bars
             categories.forEach((cat, i) => {
@@ -171,7 +192,11 @@
                 const barY = rowY + rowPad;
                 const barH = rowH - rowPad * 2;
 
-                const target = sliderYear + '-02';
+                const displayYear = Math.floor(sliderDate);
+                const displayMonth = Math.round((sliderDate % 1) * 12) + 1;
+                const mm = String(displayMonth).padStart(2, '0');
+                const target = displayYear + '-' + mm;
+
                 let closest = cat.data[0];
                 for (const d of cat.data) {
                     if (d.date <= target) closest = d;
