@@ -116,9 +116,9 @@
             // date label
             p.noStroke();
             p.fill(255);
-            p.textSize(14);
+            p.textSize(16);
             p.textAlign(p.CENTER, p.TOP);
-            p.text(monthNames[displayMonth] + ' ' + displayYear, ox + pad.left + gW / 2 - 80, oy + 55);
+            p.text(monthNames[displayMonth] + ' ' + displayYear, ox + pad.left + gW / 2 - 80, oy + 60);
 
             // buttons
             const btnY = oy + 50;
@@ -130,20 +130,20 @@
             p.fill(autoPlaying ? 80 : 40);
             p.stroke(160);
             p.strokeWeight(1);
-            p.rect(pauseBtnX, btnY, btnW, btnH, 4);
+            p.rect(pauseBtnX, btnY + 5, btnW, btnH, 4);
             p.noStroke();
             p.fill(220);
             p.textSize(11);
             p.textAlign(p.CENTER, p.CENTER);
-            p.text(autoPlaying ? 'Pause' : 'Play', pauseBtnX + btnW / 2, btnY + btnH / 2);
+            p.text(autoPlaying ? 'Pause' : 'Play', pauseBtnX + btnW / 2, btnY + btnH / 2 + 5);
 
             p.fill(40);
             p.stroke(160);
             p.strokeWeight(1);
-            p.rect(resetBtnX, btnY, btnW, btnH, 4);
+            p.rect(resetBtnX, btnY + 5, btnW, btnH, 4);
             p.noStroke();
             p.fill(220);
-            p.text('Reset', resetBtnX + btnW / 2, btnY + btnH / 2);
+            p.text('Reset', resetBtnX + btnW / 2, btnY + btnH / 2 + 5);
 
             // button clicks
             const pressed = p.mouseIsPressed;
