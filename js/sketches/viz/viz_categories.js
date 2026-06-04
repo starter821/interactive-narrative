@@ -11,12 +11,12 @@
     let pausedAt = 0;
 
     const categories = [
-        { key: 'housing', label: 'Housing 🏠', file: 'data/housing.tsv', color: '#ffffff', data: [] },
-        { key: 'apparel', label: 'Apparel 👕', file: 'data/apparel.tsv', color: '#ffffff', data: [] },
-        { key: 'food', label: 'Food 🍽️', file: 'data/food.tsv', color: '#ffffff', data: [] },
-        { key: 'medical', label: 'Medical 🏥', file: 'data/medical_care.tsv', color: '#ffffff', data: [] },
-        { key: 'gas', label: 'Gas ⛽', file: 'data/seattle_gasoline_cpi.tsv', color: '#ffffff', data: [] },
-        { key: 'transport', label: 'Transport 🚌', file: 'data/transportation.tsv', color: '#ffffff', data: [] },
+        { key: 'housing', label: 'Housing', emoji: '🏠', file: 'data/housing.tsv', color: '#ffffff', data: [] },
+        { key: 'apparel', label: 'Apparel', emoji: '👕', file: 'data/apparel.tsv', color: '#ffffff', data: [] },
+        { key: 'food', label: 'Food', emoji: '🍽️', file: 'data/food.tsv', color: '#ffffff', data: [] },
+        { key: 'medical', label: 'Medical', emoji: '🏥', file: 'data/medical_care.tsv', color: '#ffffff', data: [] },
+        { key: 'gas', label: 'Gas', emoji: '⛽', file: 'data/seattle_gasoline_cpi.tsv', color: '#ffffff', data: [] },
+        { key: 'transport', label: 'Transport', emoji: '🚌', file: 'data/transportation.tsv', color: '#ffffff', data: [] },
     ];
 
     window.VizCategories = {
@@ -181,16 +181,16 @@
                 p.stroke(180);
                 p.line(x, oy + pad.top + gH, x, oy + pad.top + gH + 5);
                 p.noStroke();
-                p.fill(200);
-                p.textSize(9);
+                p.fill(220);
+                p.textSize(10);
                 p.textAlign(p.CENTER, p.TOP);
                 p.text(v + '%', x, oy + pad.top + gH + 8);
             }
 
             // x axis label
             p.noStroke();
-            p.fill(200);
-            p.textSize(14);
+            p.fill(220);
+            p.textSize(16);
             p.textAlign(p.CENTER, p.TOP);
             p.text('Cumulative % change since 2000', ox + pad.left + gW / 2, oy + pad.top + gH + 28);
 
@@ -266,7 +266,7 @@
                 const rowY = oy + pad.top + i * rowH;
                 const rowPad = rowH * 0.25;
                 const barY = rowY + rowPad;
-                const barH = rowH - rowPad * 2;
+                const barH = rowH - rowPad * 2 - 15;
 
                 const toDecimal = (dateStr) => {
                     const [y, m] = dateStr.split('-').map(Number);
@@ -295,12 +295,24 @@
 
                 p.noStroke();
                 p.fill(cat.color);
-                p.rect(barX, barY, barW, barH, 2);
+                if (interpolated >= 0) {
+                    p.rect(barX, barY, barW, barH + 10, 0, 2, 2, 0);
+                } else {
+                    p.rect(barX, barY, barW, barH + 10, 2, 0, 0, 2);
+                }
 
-                p.fill(220);
+                p.textSize(18);
+                p.textAlign(p.LEFT, p.CENTER);
+                p.text(cat.emoji, valX + 8, barY + barH / 2 - 3);
+
                 p.textSize(11);
                 p.textAlign(p.LEFT, p.CENTER);
-                p.text(interpolated.toFixed(1) + '%', valX + 5, barY + barH / 2);
+                p.text(interpolated.toFixed(1) + '%', valX + 8, barY + barH / 2 + 14);
+
+                // p.fill(220);
+                // p.textSize(11);
+                // p.textAlign(p.LEFT, p.CENTER);
+                // p.text(interpolated.toFixed(1) + '%', valX + 5, barY + barH / 2);
             });
         },
 
