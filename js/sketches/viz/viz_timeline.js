@@ -28,7 +28,7 @@
             p.line(lineX, lineTop, lineX, lineBottom);
 
             // progress line
-            const delayedProgress = Math.max(0, Math.min((progress - 0.1) / (0.85 - 0.1), 1));
+            const delayedProgress = Math.max(0, Math.min(progress / 0.6, 1));
             const progressY = lineTop + (lineBottom - lineTop) * delayedProgress;
             p.stroke(p.color('#2DA3EE'));
             p.strokeWeight(2);
@@ -39,8 +39,8 @@
                 if (ev.type !== 'economic') return;
                 const y = lineTop + i * step;
                 const reached = progressY >= y;
-                const col = p.color('orange');
-                const dimCol = p.color(100, 60, 0);
+                const col = p.color('red');
+                const dimCol = p.color(40, 80, 110);
 
                 // horizontal tick left
                 p.stroke(reached ? col : dimCol);
@@ -49,7 +49,7 @@
 
                 // year
                 p.noStroke();
-                p.fill(reached ? col : dimCol);
+                p.fill(reached ? col : p.color(100));
                 p.textSize(16);
                 p.textAlign(p.RIGHT, p.CENTER);
                 p.text(ev.year, lineX - 44, y - 8);

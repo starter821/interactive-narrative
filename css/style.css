@@ -65,7 +65,7 @@
     top: 52px;
     width: 100%;
     z-index: 100;
-    background: #000;
+    background: #0a0a0a;
   }
   .step {
     margin-bottom: 80px;
@@ -84,7 +84,7 @@
 }
 
 #vis {
-  background-color: #000;
+  background-color: #0a0a0a;
 }
 
 #sections {
@@ -93,16 +93,16 @@
   width: 30vw;
   top: 0px;
   z-index: 90;
-  padding-bottom: 0;
+  padding-bottom:50vh;
 }
 
 .step:last-child {
   margin-bottom: 0;
-  padding-bottom: 50vh;
+  padding-bottom: 20vh;
 }
 
 .step[data-layout="full-viz"]:last-child {
-  margin-bottom: 50vh;
+  margin-bottom: 40vh;
 }
 
 .step {
@@ -129,6 +129,10 @@
 
 #sections .description {
   color: #e0e0e0
+}
+
+.title-6 {
+  font-size: 32px;
 }
 
 #extra-space {

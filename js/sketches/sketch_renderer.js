@@ -40,6 +40,8 @@
 
         draw: function (p, manager, ai, progress) {
 
+            if (ai == 0 || ai == 6 ||ai === 9) return;
+
             if (ai === 1) {
                 window.VizLineChart.draw(p, manager, ai, progress);
                 return;
