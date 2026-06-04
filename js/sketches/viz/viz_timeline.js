@@ -28,7 +28,7 @@
             p.line(lineX, lineTop, lineX, lineBottom);
 
             // progress line
-            const delayedProgress = Math.max(0, Math.min(progress / 0.6, 1));
+            const delayedProgress = Math.max(0, Math.min(progress / 0.5, 1));
             const progressY = lineTop + (lineBottom - lineTop) * delayedProgress;
             p.stroke(p.color('#2DA3EE'));
             p.strokeWeight(2);
