@@ -68,7 +68,7 @@
     p.noStroke();
     p.fill('#e8e8e8'); p.textFont(FONT); p.textStyle(p.BOLD); p.textSize(20);
     p.textAlign(p.LEFT, p.TOP);
-    p.text('Seattle Average Rent vs. Growth Rate & Proposed Cap', M.left, 18);
+    p.text('Washington Average Rent vs. Growth Rate & Rent Cap', M.left, 18);
     p.fill('#aaaaaa'); p.textStyle(p.NORMAL); p.textSize(12);
     p.text('Bars = average rent ($, left axis) — Lines = % rates (right axis)', M.left, 50);
   }
@@ -140,18 +140,19 @@
     }
 
     // ── HB 1217 annotation ──────────────────────────────────────────────────
+    const COL_HB = '#e74c3c';
     let hbX = xp(HB_T);
-    p.stroke(COL_CAP); p.strokeWeight(1.5);
-    p.drawingContext.setLineDash([5, 4]);
+    p.stroke(COL_HB); p.strokeWeight(2);
+    p.drawingContext.setLineDash([6, 4]);
     p.line(hbX, cy, hbX, cy + ch);
     p.drawingContext.setLineDash([]);
 
-    p.noStroke(); p.fill(COL_CAP);
-    p.textFont(FONT); p.textStyle(p.BOLD); p.textSize(10);
+    p.noStroke(); p.fill(COL_HB);
+    p.textFont(FONT); p.textStyle(p.BOLD); p.textSize(14);
     p.textAlign(p.CENTER, p.BOTTOM);
-    p.text('HB 1217', hbX, cy - 4);
-    p.textStyle(p.NORMAL); p.textSize(9);
-    p.text('effective July 2025', hbX, cy - 4 + 13);
+    p.text('HB 1217', hbX, cy - 6);
+    p.textStyle(p.NORMAL); p.textSize(11);
+    p.text('effective July 2025', hbX, cy - 6 + 16);
 
     // ── lines ────────────────────────────────────────────────────────────────
     function drawLine(key, col) {
