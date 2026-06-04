@@ -74,7 +74,7 @@
             if (autoPlaying && !isDragging) {
                 if (!autoPlayStart) autoPlayStart = p.millis();
                 const elapsed = (p.millis() - autoPlayStart) / 1000;
-                const duration = 6;
+                const duration = 10;
                 const t = Math.min(elapsed / duration, 1);
                 sliderDate = 2000 + t * 26;
             }
@@ -96,7 +96,7 @@
             const displayYear = Math.floor(sliderDate);
             const displayMonth = Math.min(Math.floor((sliderDate % 1) * 12), 11);
 
-            
+
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
             console.log('sliderDate:', sliderDate, 'displayYear:', displayYear, 'displayMonth:', displayMonth);
@@ -258,20 +258,28 @@
                 const barY = rowY + rowPad;
                 const barH = rowH - rowPad * 2;
 
-                const displayYear = Math.floor(sliderDate);
-                const displayMonth = Math.min(Math.floor((sliderDate % 1) * 12), 11);
-                const mm = String(displayMonth + 1).padStart(2, '0');
-                const target = displayYear + '-' + mm;
+                const toDecimal = (dateStr) => {
+                    const [y, m] = dateStr.split('-').map(Number);
+                    return y + (m - 1) / 12;
+                };
 
-                let closest = cat.data[0];
-                for (const d of cat.data) {
-                    if (d.date <= target) closest = d;
-                    else break;
+                let before = cat.data[0];
+                let after = cat.data[cat.data.length - 1];
+
+                for (let i = 0; i < cat.data.length - 1; i++) {
+                    if (toDecimal(cat.data[i].date) <= sliderDate && toDecimal(cat.data[i + 1].date) >= sliderDate) {
+                        before = cat.data[i];
+                        after = cat.data[i + 1];
+                        break;
+                    }
                 }
 
-                if (!closest || isNaN(closest.pct_from_2000)) return;
+                const t = before === after ? 0 :
+                    (sliderDate - toDecimal(before.date)) / (toDecimal(after.date) - toDecimal(before.date));
 
-                const valX = ox + pad.left + ((closest.pct_from_2000 - pctMin) / pctRange) * gW;
+                const interpolated = before.pct_from_2000 + (after.pct_from_2000 - before.pct_from_2000) * p.constrain(t, 0, 1);
+
+                const valX = ox + pad.left + ((interpolated - pctMin) / pctRange) * gW;
                 const barX = Math.min(zeroX, valX);
                 const barW = Math.abs(valX - zeroX);
 
@@ -282,8 +290,9 @@
                 p.fill(220);
                 p.textSize(11);
                 p.textAlign(p.LEFT, p.CENTER);
-                p.text(closest.pct_from_2000.toFixed(1) + '%', valX + 5, barY + barH / 2);
+                p.text(interpolated.toFixed(1) + '%', valX + 5, barY + barH / 2);
             });
+
         },
 
     };
