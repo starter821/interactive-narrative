@@ -93,8 +93,13 @@
 
                     sc.on('active', function (index) {
                         // highlight steps (light coupling — just visual text opacity)
+                        // full-text sections manage their own visibility; skip them
                         document.querySelectorAll('.step').forEach(function (el, i) {
-                            el.style.opacity = (i === index) ? '1' : '0.1';
+                            if (el.dataset.layout === 'full-text') {
+                                el.style.opacity = '';
+                            } else {
+                                el.style.opacity = (i === index) ? '1' : '0.1';
+                            }
                         });
 
                         // apply layout class from data-layout attribute

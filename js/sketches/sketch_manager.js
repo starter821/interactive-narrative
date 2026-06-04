@@ -97,11 +97,16 @@ function startP5() {
                 p.canvas.style.transform = 'translateY(' + tx.toFixed(2) + 'px)';
                 p.canvas.style.opacity = op.toFixed(3);
 
-                // mirror transition on the active text step
+                // mirror transition on the active text step (skip full-text sections — no viz to sync with)
                 var activeStep = document.querySelector('.step[data-active-index="' + (self.state.activeIndex || 0) + '"]');
                 if (activeStep) {
-                    activeStep.style.transform = 'translateY(' + tx.toFixed(2) + 'px)';
-                    activeStep.style.opacity = op.toFixed(3);
+                    if (activeStep.dataset.layout === 'full-text') {
+                        activeStep.style.transform = '';
+                        activeStep.style.opacity = '';
+                    } else {
+                        activeStep.style.transform = 'translateY(' + tx.toFixed(2) + 'px)';
+                        activeStep.style.opacity = op.toFixed(3);
+                    }
                 }
 
                 var dbg = document.getElementById('debug-state');

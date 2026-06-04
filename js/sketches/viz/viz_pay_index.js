@@ -66,7 +66,7 @@
     p.textAlign(p.LEFT, p.TOP);
     p.text('Productivity, Pay, and Prices Index (1999 Q1 = 100)', M.left, 18);
     p.fill('#aaaaaa'); p.textStyle(p.NORMAL); p.textSize(12);
-    p.text('Quarterly index — U.S. nonfarm business sector', M.left, 50);
+    p.text('Quarterly index — Washington nonfarm business sector', M.left, 50);
   }
 
   function _drawChart(p, data, mx, my) {
