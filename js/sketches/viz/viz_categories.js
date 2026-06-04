@@ -8,6 +8,7 @@
     let autoPlayStart = null;
     let lastPressed = false;
     let wasOnScene = false;
+    let pausedAt = 0;
 
     const categories = [
         { key: 'housing', label: 'Housing 🏠', file: 'data/housing.tsv', color: '#ffffff', data: [] },
@@ -23,7 +24,9 @@
         resetAnimation: function () {
             autoPlaying = false;
             autoPlayStart = null;
-            sliderYear = 2000;
+            sliderDate = 2000;
+            wasOnScene = false;
+            pausedAt = 2000;
         },
 
         preload: function (p) {
@@ -59,9 +62,9 @@
             if (!isInitialized) return;
             if (categories.some(c => c.data.length === 0)) return;
 
+            // scene enter/exit
             if (progress > 0) {
                 if (!wasOnScene) {
-                    // just entered scene, restart
                     wasOnScene = true;
                     autoPlaying = true;
                     autoPlayStart = p.millis();
@@ -71,12 +74,17 @@
                 wasOnScene = false;
             }
 
+            // auto-play tick
             if (autoPlaying && !isDragging) {
                 if (!autoPlayStart) autoPlayStart = p.millis();
                 const elapsed = (p.millis() - autoPlayStart) / 1000;
                 const duration = 10;
                 const t = Math.min(elapsed / duration, 1);
                 sliderDate = 2000 + t * 26;
+                if (t >= 1) {
+                    autoPlaying = false;
+                    pausedAt = sliderDate;
+                }
             }
 
             const ox = manager.offsetX || 0;
@@ -95,11 +103,7 @@
 
             const displayYear = Math.floor(sliderDate);
             const displayMonth = Math.min(Math.floor((sliderDate % 1) * 12), 11);
-
-
             const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-            console.log('sliderDate:', sliderDate, 'displayYear:', displayYear, 'displayMonth:', displayMonth);
 
             // title
             p.noStroke();
@@ -114,15 +118,15 @@
             p.fill(255);
             p.textSize(14);
             p.textAlign(p.CENTER, p.TOP);
-            p.text(monthNames[displayMonth] + ' ' + displayYear, ox + pad.left + gW / 2, oy + 55);
+            p.text(monthNames[displayMonth] + ' ' + displayYear, ox + pad.left + gW / 2 - 80, oy + 55);
 
+            // buttons
             const btnY = oy + 50;
             const btnW = 60;
             const btnH = 24;
             const pauseBtnX = ox + pad.left + gW / 2 + 60;
             const resetBtnX = ox + pad.left + gW / 2 + 130;
 
-            // pause/play
             p.fill(autoPlaying ? 80 : 40);
             p.stroke(160);
             p.strokeWeight(1);
@@ -133,7 +137,6 @@
             p.textAlign(p.CENTER, p.CENTER);
             p.text(autoPlaying ? 'Pause' : 'Play', pauseBtnX + btnW / 2, btnY + btnH / 2);
 
-            // reset
             p.fill(40);
             p.stroke(160);
             p.strokeWeight(1);
@@ -149,7 +152,12 @@
                 const my = p.mouseY;
                 if (mx >= pauseBtnX && mx <= pauseBtnX + btnW && my >= btnY && my <= btnY + btnH) {
                     autoPlaying = !autoPlaying;
-                    if (autoPlaying) autoPlayStart = p.millis() - ((sliderDate - 2000) / 26) * 6000;
+                    if (autoPlaying) {
+                        const prog = (pausedAt - 2000) / 26;
+                        autoPlayStart = p.millis() - prog * 10000;
+                    } else {
+                        pausedAt = sliderDate;
+                    }
                 }
                 if (mx >= resetBtnX && mx <= resetBtnX + btnW && my >= btnY && my <= btnY + btnH) {
                     sliderDate = 2000;
@@ -174,7 +182,7 @@
                 p.line(x, oy + pad.top + gH, x, oy + pad.top + gH + 5);
                 p.noStroke();
                 p.fill(200);
-                p.textSize(12);
+                p.textSize(9);
                 p.textAlign(p.CENTER, p.TOP);
                 p.text(v + '%', x, oy + pad.top + gH + 8);
             }
@@ -184,7 +192,7 @@
             p.fill(200);
             p.textSize(14);
             p.textAlign(p.CENTER, p.TOP);
-            p.text('Cumulative % change since 2000', ox + pad.left + gW / 2, oy + pad.top + gH + 40);
+            p.text('Cumulative % change since 2000', ox + pad.left + gW / 2, oy + pad.top + gH + 28);
 
             // x axis bottom line
             p.stroke(180);
@@ -223,6 +231,7 @@
                     if (Math.abs(p.mouseX - handleX) < 12 && Math.abs(p.mouseY - trackY) < 12) {
                         isDragging = true;
                         autoPlaying = false;
+                        pausedAt = sliderDate;
                     }
                 }
                 if (isDragging) {
@@ -230,6 +239,7 @@
                     sliderDate = Math.min(Math.max(sliderDate, yearMin), yearMax);
                 }
             } else {
+                if (isDragging) pausedAt = sliderDate;
                 isDragging = false;
             }
 
@@ -266,10 +276,10 @@
                 let before = cat.data[0];
                 let after = cat.data[cat.data.length - 1];
 
-                for (let i = 0; i < cat.data.length - 1; i++) {
-                    if (toDecimal(cat.data[i].date) <= sliderDate && toDecimal(cat.data[i + 1].date) >= sliderDate) {
-                        before = cat.data[i];
-                        after = cat.data[i + 1];
+                for (let j = 0; j < cat.data.length - 1; j++) {
+                    if (toDecimal(cat.data[j].date) <= sliderDate && toDecimal(cat.data[j + 1].date) >= sliderDate) {
+                        before = cat.data[j];
+                        after = cat.data[j + 1];
                         break;
                     }
                 }
@@ -292,7 +302,6 @@
                 p.textAlign(p.LEFT, p.CENTER);
                 p.text(interpolated.toFixed(1) + '%', valX + 5, barY + barH / 2);
             });
-
         },
 
     };
