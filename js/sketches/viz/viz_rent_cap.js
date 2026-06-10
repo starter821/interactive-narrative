@@ -69,8 +69,6 @@
     p.fill('#e8e8e8'); p.textFont(FONT); p.textStyle(p.BOLD); p.textSize(20);
     p.textAlign(p.LEFT, p.TOP);
     p.text('Washington Average Rent vs. Growth Rate & Rent Cap', M.left, 18);
-    p.fill('#aaaaaa'); p.textStyle(p.NORMAL); p.textSize(12);
-    p.text('Bars = average rent ($, left axis) — Lines = % rates (right axis)', M.left, 50);
   }
 
   function _drawChart(p, data, mx, my) {
@@ -113,31 +111,73 @@
 
     p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(11); p.noStroke();
 
-    // Left Y: rent dollars
+    // Left Y: rent dollars — highlight the baseline tick to flag truncation
     for (let i = 0; i <= 5; i++) {
       let v  = rentMin + (rentMax - rentMin) * i / 5;
       let yy = yRent(v);
-      p.fill(160); p.textAlign(p.RIGHT, p.CENTER);
+      p.noStroke();
+      if (i === 0) {
+        // Bold blue tick to signal this is the (truncated) baseline, not $0
+        p.fill(COL_BAR); p.textStyle(p.BOLD); p.textSize(12);
+      } else {
+        p.fill(160); p.textStyle(p.NORMAL); p.textSize(11);
+      }
+      p.textAlign(p.RIGHT, p.CENTER);
       p.text('$' + Math.round(v).toLocaleString(), cx - 8, yy);
     }
+
+    // Axis-break symbol at the base of the left y-axis (signals "not from $0")
+    let breakY = cy + ch;
+    p.stroke(100); p.strokeWeight(1.5);
+    p.line(cx - 6, breakY - 3, cx + 4, breakY + 3);
+    p.line(cx - 2, breakY - 3, cx + 8, breakY + 3);
+    // Note left-aligned near the y-axis, within the left margin
+    p.noStroke(); p.fill(COL_BAR); p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(9);
+    p.textAlign(p.LEFT, p.TOP);
+    p.text('not from $0', 2, breakY + 4);
+
+    // Left y-axis title (rotated)
+    p.push();
+    p.translate(16, cy + ch / 2);
+    p.rotate(-p.HALF_PI);
+    p.noStroke(); p.fill(COL_BAR); p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(12);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.text('Average Rent (USD)', 0, 0);
+    p.pop();
 
     // Right Y: percentage
     for (let i = 0; i <= 5; i++) {
       let v  = pctMin + (pctMax - pctMin) * i / 5;
       let yy = yPct(v);
-      p.fill(160); p.textAlign(p.LEFT, p.CENTER);
+      p.noStroke(); p.fill(160); p.textStyle(p.NORMAL); p.textSize(11);
+      p.textAlign(p.LEFT, p.CENTER);
       p.text((v * 100).toFixed(0) + '%', cx + cw + 8, yy);
     }
 
+    // Right y-axis title (rotated)
+    p.push();
+    p.translate(W - 16, cy + ch / 2);
+    p.rotate(p.HALF_PI);
+    p.noStroke(); p.fill(160); p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(12);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.text('Annual Growth Rate (%)', 0, 0);
+    p.pop();
+
     // X-axis year labels
+    p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(11);
     p.textAlign(p.CENTER, p.TOP);
     for (let yr = 2016; yr <= 2026; yr += 2) {
       let xx = xp(yr);
       if (xx < cx || xx > cx + cw) continue;
-      p.fill(160); p.text(yr, xx, cy + ch + 8);
+      p.noStroke(); p.fill(160); p.text(yr, xx, cy + ch + 8);
       p.stroke(70); p.strokeWeight(1);
       p.line(xx, cy + ch, xx, cy + ch + 5);
     }
+
+    // X-axis title
+    p.noStroke(); p.fill(160); p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(12);
+    p.textAlign(p.CENTER, p.TOP);
+    p.text('Year', cx + cw / 2, cy + ch + 30);
 
     // ── HB 1217 annotation ──────────────────────────────────────────────────
     const COL_HB = '#e74c3c';

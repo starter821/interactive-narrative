@@ -91,9 +91,10 @@
   position: relative;
   display: inline-block;
   width: 30vw;
+  min-width: 200px;
   top: 0px;
   z-index: 90;
-  padding-bottom:50vh;
+  padding-bottom: 50vh;
 }
 
 .step:last-child {
@@ -132,7 +133,7 @@
 }
 
 .title-6 {
-  font-size: 32px;
+  font-size: clamp(18px, 2.5vw, 32px);
 }
 
 #extra-space {
@@ -143,6 +144,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
   position: fixed;
   left: calc(30vw + 40px);
   right: 20px;
@@ -264,7 +266,7 @@
 
 .hero-title-main {
   display: block;
-  font-size: 52px;
+  font-size: clamp(24px, 4vw, 52px);
   font-weight: 400;
   color: #ffffff;
   line-height: 1.1;
@@ -273,7 +275,7 @@
 
 .hero-title-accent {
   display: block;
-  font-size: 76px;
+  font-size: clamp(32px, 6vw, 76px);
   font-weight: 700;
   color: #2DA3EE;
   line-height: 1.0;
