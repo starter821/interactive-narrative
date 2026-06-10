@@ -87,20 +87,21 @@
   function _slider(p) {
     let y = SL.y;
     p.stroke('#d4bc96'); p.strokeWeight(4); p.line(SL.x1, y, SL.x2, y);
-    p.stroke('#c04a3c'); p.strokeWeight(4); p.line(SL.x1, y, sliderPx, y);
+    p.stroke('#2DA3EE'); p.strokeWeight(4); p.line(SL.x1, y, sliderPx, y);
     for (let i = 0; i < YEARS.length; i++) {
       let tx = xForIdx(i), active = (i === toIdx);
       p.strokeWeight(active ? 2.5 : 1.5);
-      p.stroke(active ? '#c04a3c' : '#a0805a');
+      p.stroke(active ? '#2DA3EE' : '#a0805a');
       p.line(tx, y - 8, tx, y + 8);
       p.noStroke();
-      p.fill(active ? '#c04a3c' : '#7b5c3e');
+      p.fill(active ? '#2DA3EE' : '#7b5c3e');
       p.textFont(FONT); p.textStyle(active ? p.BOLD : p.NORMAL);
+      // y - 6 keeps year labels below the header bar (which ends at y=50)
       p.textSize(active ? 13 : 11); p.textAlign(p.CENTER, p.BOTTOM);
-      p.text(YEARS[i], tx, y - 11);
+      p.text(YEARS[i], tx, y - 6);
     }
     p.noStroke(); p.fill(0, 0, 0, 28); p.ellipse(sliderPx + 2, y + 2, 24, 24);
-    p.fill('#c04a3c'); p.ellipse(sliderPx, y, 24, 24);
+    p.fill('#2DA3EE'); p.ellipse(sliderPx, y, 24, 24);
     p.fill('#fff'); p.ellipse(sliderPx, y, 10, 10);
   }
 
@@ -152,7 +153,8 @@
 
   function _icon(p, name, x, y, s, qty) {
     let c = IC[name], gone = qty < .05;
-    let al = gone ? 38 : qty < .6 ? p.map(qty, .05, .6, 65, 222) : 222;
+    // higher alpha for "gone" items so basket weave doesn't bleed through the icon
+    let al = gone ? 90 : qty < .6 ? p.map(qty, .05, .6, 110, 222) : 222;
     p.push(); p.translate(x, y);
     switch (name) {
       case 'Bananas':
@@ -312,8 +314,9 @@
       let pct = ((now - base) / base * 100).toFixed(0);
       p.noStroke(); p.fill('#a07040');
       p.textFont(FONT); p.textStyle(p.NORMAL); p.textSize(9);
-      p.textAlign(p.RIGHT, p.BOTTOM);
-      p.text('Prices +' + pct + '% vs 2006 for same items', rx + rw - 12, ry + rh - 3);
+      // placed in the gap between last item row and the total separator — above the border lines
+      p.textAlign(p.RIGHT, p.TOP);
+      p.text('Prices +' + pct + '% vs 2006 for same items', rx + rw - 12, ry + 82 + ITEMS.length * rowH + 6);
     }
   }
 })();
